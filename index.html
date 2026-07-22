@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>축의금 명부</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --border: #e8eaed;
+            --border-light: #f1f3f5;
+            --text-primary: #1a1d23;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --accent: #3b5bdb;
+            --accent-light: #eef2ff;
+            --accent-hover: #3451c7;
+            --danger: #e03131;
+            --danger-light: #fff5f5;
+            --success: #2f9e44;
+            --success-light: #ebfbee;
+            --warning: #e8590c;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --header-h: 56px;
+            --panel-h: 130px;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 12px;
+            z-index: 1100;
+            box-shadow: var(--shadow-sm);
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .autosave-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: all .15s;
+            border: none;
+            outline: none;
+        }
+        .autosave-badge:hover { background: #dbe4ff; }
+        .autosave-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #adb5bd;
+            transition: background .2s;
+        }
+        .autosave-badge.active .dot { background: var(--success); }
+        #autosaveInfo {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        /* ── CONTROL PANEL ── */
+        .panel {
+            position: fixed;
+            top: var(--header-h);
+            left: 0; right: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 140px 12px 24px;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+        .panel-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .panel-row + .panel-row { margin-top: 8px; }
+
+        /* inputs */
+        .field {
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 10px;
+            height: 34px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .field:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,91,219,.1);
+            background: #fff;
+        }
+        .field input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--text-primary);
+            width: 100%;
+        }
+        .field input::placeholder { color: var(--text-muted); }
+        .field-name { width: 100px; }
+        .field-amount { width: 80px; }
+        .field-note { width: 130px; }
+        .field-range { width: 80px; }
+
+        /* divider */
+        .sep {
+            width: 1px; height: 20px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 34px;
+            padding: 0 14px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: all .15s;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: var(--bg); color: var(--text-primary); }
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid #fcc;
+        }
+        .btn-danger:hover { background: var(--danger-light); }
+        .btn-icon {
+            width: 34px;
+            padding: 0;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .btn-icon:hover { background: var(--bg); color: var(--text-primary); }
+
+        /* stat chip */
+        .stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .stat-chip.green { background: var(--success-light); color: var(--success); }
+
+        #infoContainer {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        #amountFrequency {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+        }
+        #amountFrequency .separator { color: var(--border); margin: 0 4px; }
+        #totalAmount { /* overridden by .stat-chip */ }
+        .entry-count-badge {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .entry-count-badge.hidden { display: none; }
+        .bill-type-icon {
+            height: var(--bill-icon-height, 26px);
+            width: auto;
+            max-width: calc(var(--bill-icon-height, 26px) * 2.1);
+            object-fit: contain;
+            border-radius: 3px;
+            vertical-align: middle;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+            transition: height .25s ease;
+        }
+        #guestList tr.row-newest .bill-type-icon { height: var(--bill-icon-height-highlighted, 34px); }
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: help;
+            flex-shrink: 0;
+        }
+
+        /* ── TABLE AREA ── */
+        .table-wrapper {
+            margin-top: calc(var(--header-h) + var(--panel-h));
+            padding: 20px 24px 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        thead tr {
+            background: var(--bg);
+        }
+        th {
+            padding: 11px 14px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: font-size .25s ease, font-weight .25s ease, color .25s ease;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #fafbff; }
+        tbody tr:hover { transition: background .1s; }
+        #guestList tr.row-newest td {
+            font-size: var(--new-row-highlight-size, 16px);
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        td:nth-child(1) { color: var(--text-muted); font-size: 12px; width: 52px; }
+        td:nth-child(2) { font-weight: 500; text-align: left; }
+        td:nth-child(3) { font-weight: 600; color: var(--accent); }
+        td:nth-child(4) {
+            text-align: left;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+            cursor: pointer;
+        }
+        td:nth-child(4):hover { color: var(--text-primary); }
+        td:nth-child(5) { width: 44px; }
+        td:nth-child(6) { width: 66px; }
+
+        /* checkbox styling */
+        td:nth-child(5) input[type="checkbox"],
+        td:nth-child(6) input[type="checkbox"] {
+            width: 16px; height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        /* inline edit buttons */
+        .edit-button, .delete-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 26px;
+            padding: 0 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all .12s;
+        }
+        .edit-button:hover { background: var(--accent-light); color: var(--accent); border-color: #c5d0f8; }
+        .delete-button { color: var(--danger); border-color: #fcc; }
+        .delete-button:hover { background: var(--danger-light); }
+
+        /* edit inputs in table */
+        .edit-input {
+            width: 100%;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59,91,219,.12);
+        }
+
+        /* ── PRINT ── */
+        @media print {
+            .header, .panel,
+            th:nth-child(5), td:nth-child(5),
+            th:nth-child(6), td:nth-child(6),
+            th:nth-child(7), td:nth-child(7),
+            th:nth-child(8), td:nth-child(8) { display: none !important; }
+            @page { size: A4 portrait; margin: 25mm 20mm; }
+            body { background: #fff; }
+            .table-wrapper { margin-top: 0; padding: 0; }
+            table {
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #ccc;
+                font-size: 10px;
+            }
+            th, td { padding: 6px 8px; }
+            tbody tr:hover td { background: none; }
+            th:nth-child(1) { width: 10%; }
+            th:nth-child(2) { width: 30%; }
+            th:nth-child(3) { width: 20%; }
+            th:nth-child(4) { width: 40%; }
+        }
+        /* ── SETTINGS MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1300;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .export-dropdown {
+            display: none;
+            position: fixed;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            padding: 8px;
+            width: 220px;
+            z-index: 1300;
+        }
+        .export-dropdown.active { display: flex; flex-direction: column; gap: 4px; }
+        .export-dropdown button { justify-content: flex-start; width: 100%; }
+        .suggestion-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 1200;
+            margin-top: 4px;
+        }
+        .suggestion-dropdown.active { display: block; }
+        .suggestion-item {
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        .suggestion-item.highlighted, .suggestion-item:hover {
+            background: var(--accent-light);
+        }
+        .modal-box {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            width: 360px;
+        }
+        .theme-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+        .theme-option:hover { background: var(--bg); }
+        .theme-option input { margin: 0; accent-color: var(--accent); flex-shrink: 0; }
+        .theme-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .theme-swatch {
+            width: 20px; height: 20px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        .theme-option span {
+            font-size: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .modal-field label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .modal-field input {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .modal-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <div class="modal-title">⚙️ 설정</div>
+            <div class="modal-field">
+                <label for="fontSizeInput">표 글꼴 크기 (px)</label>
+                <input type="number" id="fontSizeInput" min="6" max="14" step="0.5" value="9">
+            </div>
+            <div class="modal-hint">PDF 표의 글꼴 크기입니다. 크기에 따라 한 페이지 행 수가 자동으로 결정됩니다. (기본값: 9px)</div>
+            <div class="modal-field">
+                <label>데이터 표시 순서</label>
+                <div class="theme-options" id="orderOptions">
+                    <label class="theme-option" data-order="asc">
+                        <input type="radio" name="rowOrder" value="asc">
+                        <span>오래된순 (기본)</span>
+                    </label>
+                    <label class="theme-option" data-order="desc">
+                        <input type="radio" name="rowOrder" value="desc">
+                        <span>최신순 (위로)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-hint">최신순을 선택하면 새로 추가한 항목이 표 맨 위에 표시됩니다.</div>
+            <div class="modal-field">
+                <label>기본 지폐 구분</label>
+                <div class="theme-options" id="billTypeOptions" style="grid-template-columns: repeat(3, 1fr);">
+                    <label class="theme-option" data-billtype="fifty">
+                        <input type="radio" name="defaultBillType" value="fifty">
+                        <span>5만원권</span>
+                    </label>
+                    <label class="theme-option" data-billtype="ten">
+                        <input type="radio" name="defaultBillType" value="ten">
+                        <span>1만원권</span>
+                    </label>
+                    <label class="theme-option" data-billtype="check">
+                        <input type="radio" name="defaultBillType" value="check">
+                        <span>수표</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-hint">입력 폼에서 기본으로 처리할 지폐 종류입니다. 기본값은 선택 목록에 나타나지 않습니다.</div>
+            <div class="modal-field">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;">
+                        <input type="checkbox" id="showBillTypeSummaryInput" style="width:16px;height:16px;padding:0;border:none;">
+                        <span style="font-size:11px;color:var(--text-primary);">PDF 결산 페이지에 지폐 구분 합계 표시</span>
+                    </label>
+                    <label for="billTypeSummaryColorInput" style="font-size:12px;color:var(--text-secondary);white-space:nowrap;">색상</label>
+                    <input type="color" id="billTypeSummaryColorInput" value="#3b5bdb" style="width:44px;height:28px;padding:2px;cursor:pointer;flex-shrink:0;">
+                </div>
+            </div>
+            <div class="modal-hint">PDF로 내보낼 때 결산 페이지에 5만원권/1만원권/수표 합계를 표시할지, 어떤 색으로 표시할지 정합니다.</div>
+            <div class="modal-field">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="showEntryCountInput" style="width:16px;height:16px;padding:0;border:none;">
+                    <span style="font-size:12px;color:var(--text-primary);">현재 입력 번호 크게 표시 (패널 오른쪽 끝)</span>
+                </label>
+            </div>
+            <div class="modal-field">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="autoSubmitOnSuggestionEnterInput" style="width:16px;height:16px;padding:0;border:none;">
+                    <span style="font-size:12px;color:var(--text-primary);">비고 자동완성 선택 후 Enter로 바로 추가</span>
+                </label>
+            </div>
+            <div class="modal-hint">끄면 자동완성 선택 후에도 비고만 채워지고, 추가하려면 Enter를 한 번 더 눌러야 합니다.</div>
+            <div class="modal-field">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="enableNewRowHighlightInput" style="width:16px;height:16px;padding:0;border:none;">
+                    <span style="font-size:12px;color:var(--text-primary);">새로 입력한 항목 강조 효과 (표에서 크게 표시)</span>
+                </label>
+            </div>
+            <div class="modal-field">
+                <label for="newRowHighlightSizeInput">강조 효과 크기 (px)</label>
+                <input type="number" id="newRowHighlightSizeInput" min="13" max="30" step="1" value="16">
+            </div>
+            <div class="modal-field">
+                <label for="billIconSizeInput">지폐 이미지 크기 (1~10단계, 현재값: 10)</label>
+                <input type="number" id="billIconSizeInput" min="1" max="10" step="1" value="10">
+            </div>
+            <div class="modal-hint">숫자가 클수록 표의 지폐/수표 이미지가 크게 표시됩니다.</div>
+            <div class="modal-field">
+                <label>지폐/수표 이미지 링크</label>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">5만원권</span>
+                        <input type="text" id="billImageFiftyInput" placeholder="이미지 URL" style="flex:1;">
+                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('fifty')">적용</button>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">1만원권</span>
+                        <input type="text" id="billImageTenInput" placeholder="이미지 URL" style="flex:1;">
+                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('ten')">적용</button>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">수표</span>
+                        <input type="text" id="billImageCheckInput" placeholder="이미지 URL" style="flex:1;">
+                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('check')">적용</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-hint">이미지가 안 보이면 여기서 새 링크로 바로 교체할 수 있습니다 (칸을 비우고 적용하면 기본 이미지로 되돌아갑니다).</div>
+            <div class="modal-field">
+                <div style="display:flex;gap:16px;">
+                    <div style="flex:1;">
+                        <label for="entryCountFontSizeInput">입력 번호 폰트 크기 (px)</label>
+                        <input type="number" id="entryCountFontSizeInput" min="12" max="60" step="1" value="20">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="entryCountColorInput">입력 번호 색상</label>
+                        <input type="color" id="entryCountColorInput" value="#3b5bdb" style="width:100%;height:34px;padding:2px;cursor:pointer;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-field">
+                <label>PDF 디자인</label>
+                <div class="theme-options" id="themeOptions">
+                    <label class="theme-option" data-theme="minimal">
+                        <input type="radio" name="pdfTheme" value="minimal">
+                        <span class="theme-swatch" style="background:#3b5bdb;"></span>
+                        <span>미니멀 화이트</span>
+                    </label>
+                    <label class="theme-option" data-theme="charcoal">
+                        <input type="radio" name="pdfTheme" value="charcoal">
+                        <span class="theme-swatch" style="background:#2b2d31;"></span>
+                        <span>모던 차콜</span>
+                    </label>
+                    <label class="theme-option" data-theme="coral">
+                        <input type="radio" name="pdfTheme" value="coral">
+                        <span class="theme-swatch" style="background:#e8590c;"></span>
+                        <span>모던 코럴</span>
+                    </label>
+                    <label class="theme-option" data-theme="teal">
+                        <input type="radio" name="pdfTheme" value="teal">
+                        <span class="theme-swatch" style="background:#0f9d76;"></span>
+                        <span>모던 틸</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-hint">PDF로 내보내기 및 인쇄 시 적용될 디자인입니다.</div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeSettings()">취소</button>
+                <button class="btn btn-primary" onclick="saveSettings()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPORT DROPDOWN -->
+    <div class="export-dropdown" id="exportModal">
+        <button class="btn btn-ghost" onclick="runExportAction('pdf')">📄 PDF로 내보내기</button>
+        <button class="btn btn-ghost" onclick="runExportAction('pdfChecked')">📄 체크 항목만 PDF로 내보내기</button>
+        <button class="btn btn-ghost" onclick="runExportAction('printAll')">🖨 전체 인쇄</button>
+        <button class="btn btn-ghost" onclick="runExportAction('printChecked')">🖨 체크 항목만 인쇄</button>
+    </div>
+
+
+    <!-- HEADER -->
+    <div class="header">
+        <span class="header-title">축의금 명부</span>
+        <button class="autosave-badge" id="autosaveBadge" onclick="toggleAutoSave()">
+            <span class="dot"></span>
+            자동저장
+        </button>
+        <span id="autosaveInfo"></span>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div class="panel">
+        <!-- Row 1: Input + Actions -->
+        <div class="panel-row">
+            <div class="field field-name">
+                <input type="text" id="name" placeholder="이름">
+            </div>
+            <div class="field field-amount">
+                <input type="text" id="amount" placeholder="금액 (만원)" oninput="validateAmount(this)">
+            </div>
+            <div class="field field-note" style="position:relative;">
+                <input type="text" id="note" placeholder="비고" maxlength="20" autocomplete="off">
+                <div id="noteSuggestionDropdown" class="suggestion-dropdown"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);white-space:nowrap;">
+                <div id="topBillTypeOptions" style="display:flex;align-items:center;gap:6px;"></div>
+                <span class="info-icon" id="billTypeInfoIcon">?</span>
+            </div>
+            <button class="btn btn-primary" onclick="addEntry()">추가</button>
+            <div class="sep"></div>
+            <button class="btn btn-ghost" onclick="saveData()">💾 저장</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">📂 불러오기</button>
+            <button class="btn btn-ghost" onclick="openExportModal(event)">📤 내보내기</button>
+            <input type="file" id="fileInput" style="display:none;" onchange="loadFromFile(event)">
+            <button class="btn btn-danger" onclick="resetData()">초기화</button>
+            <div class="sep"></div>
+            <button class="btn btn-ghost" onclick="openSettings()">⚙️ 설정</button>
+        </div>
+        <!-- Row 2: Range + Stats + Undo/Redo -->
+        <div class="panel-row">
+            <div class="field field-range">
+                <input type="text" id="startRow" placeholder="시작" oninput="calculateTotal()">
+            </div>
+            <span style="color:var(--text-muted);font-size:12px;">~</span>
+            <div class="field field-range">
+                <input type="text" id="endRow" placeholder="끝" oninput="calculateTotal()">
+            </div>
+            <span class="stat-chip green" id="totalAmount">총금액: 0 만원</span>
+            <div class="sep"></div>
+            <span id="infoContainer" style="color:var(--text-secondary);font-size:12px;">현재 순서: 0&nbsp;&nbsp;누적: 0 만원</span>
+            <div class="sep"></div>
+            <button class="btn btn-icon" onclick="undoEntry()" title="되돌리기">↩</button>
+            <button class="btn btn-icon" onclick="redoEntry()" title="다시실행">↪</button>
+            <div class="sep"></div>
+            <div id="amountFrequency" style="margin-left:8px;font-size:11.5px;color:var(--text-secondary);">금액 빈도:</div>
+        </div>
+        <span id="entryCountBadge" class="entry-count-badge">0</span>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrapper" id="tableContainer">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th style="text-align:left">이름</th>
+                    <th>금액</th>
+                    <th style="text-align:left">비고</th>
+                    <th><input type="checkbox" id="checkAllHeader" onclick="toggleAllChecks(this)" title="전체 체크/해제" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);"></th>
+                    <th title="지폐 구분 (5만원권 / 1만원권 / 수표)"><span class="info-icon">?</span></th>
+                    <th>수정</th>
+                    <th>삭제</th>
+                </tr>
+            </thead>
+            <tbody id="guestList"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script>
+        var _memStore = {};
+        var _lsAvailable = (function() {
+            try {
+                var testKey = '__lstest__';
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        })();
+        var storage = {
+            getItem: function(key) {
+                if (_lsAvailable) {
+                    try { return localStorage.getItem(key); } catch (e) { /* fall through */ }
+                }
+                return Object.prototype.hasOwnProperty.call(_memStore, key) ? _memStore[key] : null;
+            },
+            setItem: function(key, value) {
+                if (_lsAvailable) {
+                    try { localStorage.setItem(key, value); return; } catch (e) { /* fall through */ }
+                }
+                _memStore[key] = String(value);
+            },
+            removeItem: function(key) {
+                if (_lsAvailable) {
+                    try { localStorage.removeItem(key); return; } catch (e) { /* fall through */ }
+                }
+                delete _memStore[key];
+            }
+        };
+
+        let rowIndex = 1;
+        let lastNewRow = null;
+        let cumulativeTotal = 0;
+        let currentFileName = null;
+        let autoSaveInterval = null;
+        let isAutoSaveEnabled = false;
+        let history = [];
+        let historyIndex = -1;
+        let isDataModified = false;
+        let amountFrequency = {};
+
+        // ── Measure panel height after render ──
+        function adjustTableMargin() {
+            const panel = document.querySelector('.panel');
+            const wrapper = document.querySelector('.table-wrapper');
+            const headerH = 56;
+            wrapper.style.marginTop = (headerH + panel.offsetHeight + 4) + 'px';
+        }
+        window.addEventListener('load', adjustTableMargin);
+        window.addEventListener('resize', adjustTableMargin);
+
+        window.addEventListener('beforeunload', function(event) {
+            if (isDataModified) {
+                event.preventDefault();
+                event.returnValue = '변경사항이 저장되지 않았습니다.';
+            }
+        });
+
+        window.addEventListener('load', function() {
+            restoreCheckboxStates();
+            updateEntryCountVisibility();
+            updateEntryCountFontSize();
+            updateEntryCountDisplay();
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            updateHighlightAndIconSizes();
+            renderTopBillTypeOptions();
+        });
+
+        function saveCheckboxStates() {
+            const table = document.getElementById('guestList');
+            const rows = table.getElementsByTagName('tr');
+            const states = Array.from(rows).map(row => row.cells[4].querySelector('input[type="checkbox"]').checked);
+            storage.setItem('checkboxStates', JSON.stringify(states));
+            syncHeaderCheckbox();
+        }
+
+        function restoreCheckboxStates() {
+            const table = document.getElementById('guestList');
+            const rows = table.getElementsByTagName('tr');
+            const states = JSON.parse(storage.getItem('checkboxStates')) || [];
+            states.forEach((checked, index) => {
+                if (rows[index]) {
+                    rows[index].cells[4].querySelector('input[type="checkbox"]').checked = checked;
+                }
+            });
+            syncHeaderCheckbox();
+        }
+
+        function saveHistory() {
+            const table = document.getElementById('guestList');
+            const rows = Array.from(table.rows).map(row => ({
+                seq: row.cells[0].textContent,
+                name: row.cells[1].textContent,
+                amount: row.cells[2].textContent.replace(/[^\d]/g, ''),
+                note: row.cells[3].textContent,
+                checked: row.cells[4].querySelector('input[type="checkbox"]').checked,
+                billType: row.cells[5].dataset.billtype || 'fifty'
+            }));
+            if (historyIndex < 0 || JSON.stringify(history[historyIndex]) !== JSON.stringify(rows)) {
+                history = history.slice(0, historyIndex + 1);
+                history.push(rows);
+                historyIndex++;
+                isDataModified = true;
+            }
+        }
+
+        function restoreHistory(index) {
+            const table = document.getElementById('guestList');
+            table.innerHTML = '';
+            rowIndex = 1;
+            cumulativeTotal = 0;
+            amountFrequency = {};
+            let maxSeq = 0;
+            history[index].forEach(row => {
+                const seqNum = parseInt(row.seq);
+                if (!isNaN(seqNum)) maxSeq = Math.max(maxSeq, seqNum);
+                addRowWithoutHistory(row.name, parseInt(row.amount), row.note, row.checked, false, row.seq, row.billType);
+            });
+            rowIndex = maxSeq + 1;
+            applyRowOrderToDOM();
+            displayAmountFrequency();
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            updateCumulativeTotal();
+            isDataModified = true;
+        }
+
+        function validateAmount(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        function formatAmount(amount) {
+            return parseInt(amount).toLocaleString() + ' 만원';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                if (event.isComposing || event.keyCode === 229) return;
+                const activeElement = document.activeElement;
+                if (activeElement.closest('.modal-overlay')) return;
+                if (activeElement.classList.contains('edit-input')) {
+                    completeEdit(activeElement.parentNode.parentNode.querySelector('.edit-button'));
+                } else {
+                    addEntry();
+                }
+            }
+        });
+
+        function autoDetectBillType(amtNum, explicitBillType) {
+            if (explicitBillType) return explicitBillType;
+            if (!isNaN(amtNum) && amtNum > 0 && amtNum < 10 && amtNum !== 5) {
+                return 'ten';
+            }
+            return storage.getItem('defaultBillType') || 'fifty';
+        }
+
+        function applyAutoDetectToLoadedBillType(amtNum, loadedBillType) {
+            if (loadedBillType === 'ten' || loadedBillType === 'check') return loadedBillType;
+            if (!isNaN(amtNum) && amtNum > 0 && amtNum < 10 && amtNum !== 5) {
+                return 'ten';
+            }
+            return loadedBillType || 'fifty';
+        }
+
+        function addEntry() {
+            var name = document.getElementById('name').value;
+            var amount = document.getElementById('amount').value;
+            var note = document.getElementById('note').value;
+            var billTypeEl = document.querySelector('input[name="billTypeInput"]:checked');
+            var billType = autoDetectBillType(parseInt(amount), billTypeEl ? billTypeEl.value : null);
+
+            if (name === "" || amount === "") {
+                alert("이름과 금액은 필수 항목입니다.");
+                return;
+            }
+
+            saveHistory();
+            addRow(name, parseInt(amount), note, false, billType);
+
+            document.getElementById('name').value = "";
+            document.getElementById('amount').value = "";
+            document.getElementById('note').value = "";
+            document.querySelectorAll('input[name="billTypeInput"]').forEach(function(r) { r.checked = false; });
+            document.getElementById('name').focus();
+        }
+
+        function addRow(name, amount, note, checked = false, billType = 'fifty') {
+            var table = document.getElementById('guestList');
+            var row = isReversedOrder() ? table.insertRow(0) : table.insertRow();
+            buildRowCells(row, name, amount, note, checked, undefined, billType);
+            cumulativeTotal += amount;
+            updateInfoContainer();
+            scrollToBottom();
+            updateAmountFrequency(amount, true);
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            syncHeaderCheckbox();
+            if (storage.getItem('enableNewRowHighlight') !== 'false') {
+                if (lastNewRow) {
+                    lastNewRow.classList.remove('row-newest');
+                }
+                row.classList.add('row-newest');
+                lastNewRow = row;
+            }
+            isDataModified = true;
+            adjustTableMargin();
+        }
+
+        function addRowWithoutHistory(name, amount, note, checked = false, updateFrequency = true, seq, billType = 'fifty') {
+            var table = document.getElementById('guestList');
+            var row = table.insertRow();
+            buildRowCells(row, name, amount, note, checked, seq, billType);
+            cumulativeTotal += amount;
+            updateInfoContainer();
+            scrollToBottom();
+            if (updateFrequency) updateAmountFrequency(amount, true);
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            syncHeaderCheckbox();
+            isDataModified = true;
+        }
+
+        function buildRowCells(row, name, amount, note, checked, seq, billType) {
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            var cellBillType = row.insertCell(5);
+            var cell6 = row.insertCell(6);
+            var cell7 = row.insertCell(7);
+
+            cell1.textContent = (seq !== undefined && seq !== null && seq !== "") ? seq : rowIndex++;
+            cell2.textContent = name;
+            cell3.textContent = formatAmount(amount);
+            cell4.textContent = note;
+            cell4.addEventListener('click', function() { editCell(cell4); });
+
+            cell5.innerHTML = `<input type="checkbox" class="print-check" ${checked ? "checked" : ""}>`;
+            cell5.style.width = "44px";
+            cell5.addEventListener('click', function(event) {
+                if (event.target.tagName !== 'INPUT') {
+                    const checkbox = cell5.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+                saveCheckboxStates();
+            });
+
+            var bt = billType || 'fifty';
+            cellBillType.innerHTML = billTypeMarkHTML(bt);
+            cellBillType.dataset.billtype = bt;
+            cellBillType.style.width = "50px";
+            cellBillType.style.textAlign = "center";
+
+            cell6.innerHTML = `<button class="edit-button" onclick="editRow(this)">수정</button>`;
+            cell7.innerHTML = `<button class="delete-button" onclick="deleteRow(this)">삭제</button>`;
+        }
+
+        var BILL_TYPE_IMAGES = {
+            fifty: 'https://BlackPB.github.io/image-host/5m.png',
+            ten: 'https://BlackPB.github.io/image-host/1m.png',
+            check: 'https://BlackPB.github.io/image-host/10m.png'
+        };
+
+        function getBillImageUrl(bt) {
+            var storageKey = bt === 'ten' ? 'billImageTen' : (bt === 'check' ? 'billImageCheck' : 'billImageFifty');
+            return storage.getItem(storageKey) || BILL_TYPE_IMAGES[bt] || BILL_TYPE_IMAGES.fifty;
+        }
+
+        function applyBillImage(bt) {
+            var inputId = bt === 'ten' ? 'billImageTenInput' : (bt === 'check' ? 'billImageCheckInput' : 'billImageFiftyInput');
+            var storageKey = bt === 'ten' ? 'billImageTen' : (bt === 'check' ? 'billImageCheck' : 'billImageFifty');
+            var url = document.getElementById(inputId).value.trim();
+            if (url) {
+                storage.setItem(storageKey, url);
+            } else {
+                storage.removeItem(storageKey);
+            }
+            refreshAllBillTypeIcons();
+        }
+
+        function refreshAllBillTypeIcons() {
+            var rows = document.getElementById('guestList').getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var cell = rows[i].cells[5];
+                var bt = cell.dataset.billtype || 'fifty';
+                cell.innerHTML = billTypeMarkHTML(bt);
+                cell.dataset.billtype = bt;
+            }
+        }
+
+        function billTypeMarkHTML(bt) {
+            var t = bt || 'fifty';
+            var label = billTypeLabel(t);
+            var src = getBillImageUrl(t);
+            return `<img src="${src}" alt="${label}" title="${label}" class="bill-type-icon" loading="lazy">`;
+        }
+
+        function billTypeRadioHTML(current) {
+            var groupName = 'billtype_' + Math.random().toString(36).slice(2);
+            function opt(val, label) {
+                return `<label style="display:flex;align-items:center;gap:2px;font-size:10px;white-space:nowrap;cursor:pointer;"><input type="radio" name="${groupName}" class="bill-type-radio" value="${val}" ${current===val?'checked':''} style="width:11px;height:11px;accent-color:var(--accent);">${label}</label>`;
+            }
+            return `<div style="display:flex;flex-direction:column;gap:2px;align-items:flex-start;">${opt('fifty','5만')}${opt('ten','1만')}${opt('check','수표')}</div>`;
+        }
+
+        function updateAmountFrequency(amount, increment) {
+            if (increment) {
+                amountFrequency[amount] = (amountFrequency[amount] || 0) + 1;
+            } else {
+                if (amountFrequency[amount]) {
+                    amountFrequency[amount]--;
+                    if (amountFrequency[amount] === 0) delete amountFrequency[amount];
+                }
+            }
+            displayAmountFrequency();
+        }
+
+        function displayAmountFrequency() {
+            const div = document.getElementById('amountFrequency');
+            const freqs = Object.entries(amountFrequency)
+                .map(([amount, count]) => `<span>${amount} 만원 <b style="color:var(--accent)">${count}건</b></span>`)
+                .join(' <span class="separator">｜</span> ');
+            div.innerHTML = '금액 빈도: ' + (freqs || '—');
+        }
+
+        var allNoteValues = [];
+        var currentNoteMatches = [];
+        var noteSuggestionIndex = -1;
+
+        function updateNoteSuggestions() {
+            var rows = document.getElementById('guestList').getElementsByTagName('tr');
+            var seen = {};
+            var notes = [];
+            for (var i = 0; i < rows.length; i++) {
+                var note = rows[i].cells[3].textContent.trim();
+                if (note && !seen[note]) {
+                    seen[note] = true;
+                    notes.push(note);
+                }
+            }
+            allNoteValues = notes;
+        }
+
+        var CHOSEONG_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+        var JUNGSEONG_LIST = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+        var JONGSEONG_LIST = ['', 'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+        function decomposeHangul(ch) {
+            var code = ch.charCodeAt(0) - 0xAC00;
+            if (code < 0 || code > 11171) return null;
+            return {
+                cho: CHOSEONG_LIST[Math.floor(code / 588)],
+                jung: JUNGSEONG_LIST[Math.floor((code % 588) / 28)],
+                jong: JONGSEONG_LIST[code % 28]
+            };
+        }
+
+        function hangulCharMatches(targetChar, queryChar) {
+            if (targetChar === queryChar) return true;
+            if (/^[ㄱ-ㅎ]$/.test(queryChar)) {
+                var t1 = decomposeHangul(targetChar);
+                return t1 !== null && t1.cho === queryChar;
+            }
+            if (/^[ㅏ-ㅣ]$/.test(queryChar)) {
+                var t2 = decomposeHangul(targetChar);
+                return t2 !== null && t2.jung === queryChar;
+            }
+            var q = decomposeHangul(queryChar);
+            if (q && q.jong === '') {
+                var t3 = decomposeHangul(targetChar);
+                return t3 !== null && t3.cho === q.cho && t3.jung === q.jung;
+            }
+            return false;
+        }
+
+        function findHangulMatchIndex(target, query) {
+            if (!query || query.length > target.length) return -1;
+            for (var i = 0; i < query.length; i++) {
+                if (!hangulCharMatches(target[i], query[i])) return -1;
+            }
+            return 0;
+        }
+
+        function renderNoteSuggestionDropdown() {
+            var input = document.getElementById('note');
+            var dropdown = document.getElementById('noteSuggestionDropdown');
+            var query = input.value.trim();
+            noteSuggestionIndex = -1;
+            if (!query) {
+                closeNoteSuggestionDropdown();
+                return;
+            }
+            var matches = allNoteValues.filter(function(n) {
+                return n !== query && findHangulMatchIndex(n, query) !== -1;
+            });
+            matches.sort(function(a, b) {
+                var aIdx = findHangulMatchIndex(a, query);
+                var bIdx = findHangulMatchIndex(b, query);
+                if (aIdx !== bIdx) return aIdx - bIdx;
+                return a.localeCompare(b);
+            });
+            currentNoteMatches = matches;
+            if (matches.length === 0) {
+                closeNoteSuggestionDropdown();
+                return;
+            }
+            dropdown.innerHTML = matches.map(function(m, idx) {
+                return `<div class="suggestion-item" data-index="${idx}" onmousedown="selectNoteSuggestion(${idx}, false)">${m}</div>`;
+            }).join('');
+            dropdown.classList.add('active');
+        }
+
+        function highlightNoteSuggestion() {
+            var dropdown = document.getElementById('noteSuggestionDropdown');
+            var items = dropdown.querySelectorAll('.suggestion-item');
+            items.forEach(function(item, idx) {
+                item.classList.toggle('highlighted', idx === noteSuggestionIndex);
+            });
+            if (items[noteSuggestionIndex]) {
+                items[noteSuggestionIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function closeNoteSuggestionDropdown() {
+            var dropdown = document.getElementById('noteSuggestionDropdown');
+            dropdown.classList.remove('active');
+            dropdown.innerHTML = '';
+            currentNoteMatches = [];
+            noteSuggestionIndex = -1;
+        }
+
+        function selectNoteSuggestion(idx, viaEnter) {
+            var input = document.getElementById('note');
+            input.value = currentNoteMatches[idx];
+            closeNoteSuggestionDropdown();
+            if (viaEnter && storage.getItem('autoSubmitOnSuggestionEnter') !== 'false') {
+                addEntry();
+            } else {
+                input.focus();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var noteInput = document.getElementById('note');
+            noteInput.addEventListener('input', renderNoteSuggestionDropdown);
+            noteInput.addEventListener('blur', function() {
+                setTimeout(closeNoteSuggestionDropdown, 150);
+            });
+            noteInput.addEventListener('keydown', function(event) {
+                if (event.isComposing || event.keyCode === 229) return;
+                var dropdown = document.getElementById('noteSuggestionDropdown');
+                if (!dropdown.classList.contains('active') || currentNoteMatches.length === 0) return;
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    noteSuggestionIndex = Math.min(noteSuggestionIndex + 1, currentNoteMatches.length - 1);
+                    highlightNoteSuggestion();
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    noteSuggestionIndex = Math.max(noteSuggestionIndex - 1, 0);
+                    highlightNoteSuggestion();
+                } else if (event.key === 'Enter') {
+                    if (noteSuggestionIndex >= 0) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        selectNoteSuggestion(noteSuggestionIndex, true);
+                    }
+                } else if (event.key === 'Escape') {
+                    closeNoteSuggestionDropdown();
+                }
+            });
+        });
+
+        function updateBillTypeSummary() {
+            var rows = document.getElementById('guestList').getElementsByTagName('tr');
+            var fiftyAmount = 0, tenAmount = 0, checkAmount = 0;
+            for (var i = 0; i < rows.length; i++) {
+                var amt = parseInt(rows[i].cells[2].textContent.replace(/[^\d]/g, ''));
+                if (isNaN(amt)) continue;
+                var bt = rows[i].cells[5].dataset.billtype || 'fifty';
+                if (bt === 'ten') tenAmount += amt;
+                else if (bt === 'check') checkAmount += amt;
+                else fiftyAmount += amt;
+            }
+            var div = document.getElementById('billTypeSummary');
+            if (div) {
+                div.innerHTML = `5만원권 <b style="color:var(--accent)">${fiftyAmount.toLocaleString()}만</b>` +
+                    ` <span class="separator">｜</span> 1만원권 <b style="color:var(--accent)">${tenAmount.toLocaleString()}만</b>` +
+                    ` <span class="separator">｜</span> 수표 <b style="color:var(--accent)">${checkAmount.toLocaleString()}만</b>`;
+            }
+        }
+
+        function editRow(button) {
+            var row = button.parentNode.parentNode;
+            var cells = row.getElementsByTagName("td");
+            row.dataset.originalAmount = cells[2].textContent.replace(/[^\d]/g, '');
+            cells[1].innerHTML = `<input type="text" class="edit-input" value="${cells[1].textContent}">`;
+            cells[2].innerHTML = `<input type="text" class="edit-input" value="${cells[2].textContent.replace(/[^0-9]/g, '')}">`;
+            cells[3].innerHTML = `<input type="text" class="edit-input" value="${cells[3].textContent}" maxlength="20">`;
+            cells[5].innerHTML = billTypeRadioHTML(cells[5].dataset.billtype || 'fifty');
+            button.textContent = "완료";
+            button.setAttribute("onclick", "completeEdit(this)");
+        }
+
+        function editCell(cell) {
+            var cellContent = cell.textContent;
+            cell.innerHTML = `<input type="text" class="edit-input" value="${cellContent}" maxlength="20">`;
+            var input = cell.querySelector('input');
+            input.focus();
+            input.select();
+            input.addEventListener('blur', function() {
+                completeEdit(cell.parentNode.querySelector('.edit-button'));
+            });
+        }
+
+        function completeEdit(button) {
+            var row = button.parentNode.parentNode;
+            var cells = row.getElementsByTagName("td");
+            var nameInput = cells[1].getElementsByTagName("input")[0];
+            var amountInput = cells[2].getElementsByTagName("input")[0];
+            var noteInput = cells[3].getElementsByTagName("input")[0];
+
+            var oldAmount = (row.dataset.originalAmount !== undefined)
+                ? parseInt(row.dataset.originalAmount)
+                : parseInt(cells[2].textContent.replace(/[^\d]/g, ''));
+            delete row.dataset.originalAmount;
+
+            var newName = nameInput ? nameInput.value : cells[1].textContent;
+            var newAmount = amountInput ? parseInt(amountInput.value) : parseInt(cells[2].textContent.replace(/[^\d]/g, ''));
+            var newNote = noteInput ? noteInput.value : cells[3].textContent;
+
+            cells[1].textContent = newName;
+            cells[2].textContent = (isNaN(newAmount) || newAmount === "") ? "" : formatAmount(newAmount);
+            cells[3].textContent = newNote;
+
+            var billTypeInput = cells[5].querySelector('input[type="radio"]:checked');
+            if (billTypeInput) {
+                var newBillType = billTypeInput.value;
+                cells[5].dataset.billtype = newBillType;
+                cells[5].innerHTML = billTypeMarkHTML(newBillType);
+            }
+
+            if (!isNaN(oldAmount) && oldAmount !== newAmount) {
+                updateAmountFrequency(oldAmount, false);
+                if (!isNaN(newAmount)) updateAmountFrequency(newAmount, true);
+            } else if (isNaN(oldAmount) && !isNaN(newAmount)) {
+                updateAmountFrequency(newAmount, true);
+            }
+
+            button.textContent = "수정";
+            button.setAttribute("onclick", "editRow(this)");
+
+            updateCumulativeTotal();
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            isDataModified = true;
+        }
+
+        function deleteRow(button) {
+            saveHistory();
+            var row = button.parentNode.parentNode;
+            var table = document.getElementById('guestList');
+            var amount = parseInt(row.getElementsByTagName("td")[2].textContent.replace(/[^\d]/g, ''));
+            var deletedSeq = parseInt(row.getElementsByTagName("td")[0].textContent);
+            cumulativeTotal -= isNaN(amount) ? 0 : amount;
+            if (row === lastNewRow) lastNewRow = null;
+            row.remove();
+
+            var rows = table.getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var cell = rows[i].getElementsByTagName('td')[0];
+                var seq = parseInt(cell.textContent);
+                if (!isNaN(seq) && !isNaN(deletedSeq) && seq > deletedSeq) {
+                    cell.textContent = seq - 1;
+                }
+            }
+            rowIndex--;
+            updateInfoContainer();
+            updateAmountFrequency(amount, false);
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            isDataModified = true;
+            saveCheckboxStates();
+        }
+
+        function resetData() {
+            if (!confirm('정말로 초기화하시겠습니까?\n모든 데이터가 삭제되며 되돌릴 수 없습니다.')) {
+                return;
+            }
+            saveHistory();
+            var table = document.getElementById('guestList');
+            table.innerHTML = '';
+            rowIndex = 1;
+            cumulativeTotal = 0;
+            currentFileName = null;
+            updateInfoContainer();
+            isDataModified = true;
+            storage.removeItem('checkboxStates');
+            amountFrequency = {};
+            displayAmountFrequency();
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+        }
+
+        function billTypeToLabel(bt) {
+            if (bt === 'ten') return '1만원권';
+            if (bt === 'check') return '수표';
+            return '5만원권';
+        }
+
+        function labelToBillType(row) {
+            if (row.지폐구분 === '1만원권') return 'ten';
+            if (row.지폐구분 === '수표') return 'check';
+            if (row.지폐구분 === '5만원권') return 'fifty';
+            // 이전 버전 파일(만원권 boolean 컬럼) 호환
+            if (row.만원권 === true || row.만원권 === 'TRUE') return 'ten';
+            return 'fifty';
+        }
+
+        function saveData() {
+            var data = [];
+            var table = document.getElementById('guestList');
+            var rows = table.getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var cells = rows[i].getElementsByTagName('td');
+                data.push({
+                    순서: cells[0].textContent,
+                    이름: cells[1].textContent,
+                    금액: cells[2].textContent.replace(/[^\d]/g, ''),
+                    비고: cells[3].textContent,
+                    체크: cells[4].querySelector('input[type="checkbox"]').checked,
+                    지폐구분: billTypeToLabel(cells[5].dataset.billtype || 'fifty')
+                });
+            }
+            var ws = XLSX.utils.json_to_sheet(data);
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "축의금 명부");
+            let fileName = currentFileName ? currentFileName : getCurrentDateTime() + '.xlsx';
+            XLSX.writeFile(wb, fileName);
+            resetAutoSaveInterval();
+            updateAutoSaveInfo();
+            isDataModified = false;
+        }
+
+        function openSettings() {
+            var savedFont = parseFloat(storage.getItem('pdfFontSize')) || 9;
+            document.getElementById('fontSizeInput').value = savedFont;
+            var savedTheme = storage.getItem('pdfTheme') || 'minimal';
+            setThemeSelection(savedTheme);
+            var savedOrder = storage.getItem('rowOrder') || 'asc';
+            setOrderSelection(savedOrder);
+            setDefaultBillTypeSelection(storage.getItem('defaultBillType') || 'fifty');
+            document.getElementById('showBillTypeSummaryInput').checked = storage.getItem('showBillTypeSummary') !== 'false';
+            document.getElementById('billTypeSummaryColorInput').value = storage.getItem('billTypeSummaryColor') || '#3b5bdb';
+            document.getElementById('showEntryCountInput').checked = storage.getItem('showEntryCount') !== 'false';
+            document.getElementById('autoSubmitOnSuggestionEnterInput').checked = storage.getItem('autoSubmitOnSuggestionEnter') !== 'false';
+            document.getElementById('enableNewRowHighlightInput').checked = storage.getItem('enableNewRowHighlight') !== 'false';
+            document.getElementById('newRowHighlightSizeInput').value = parseFloat(storage.getItem('newRowHighlightSize')) || 16;
+            document.getElementById('billIconSizeInput').value = parseFloat(storage.getItem('billIconSize')) || 10;
+            document.getElementById('billImageFiftyInput').value = getBillImageUrl('fifty');
+            document.getElementById('billImageTenInput').value = getBillImageUrl('ten');
+            document.getElementById('billImageCheckInput').value = getBillImageUrl('check');
+            document.getElementById('entryCountFontSizeInput').value = parseFloat(storage.getItem('entryCountFontSize')) || 20;
+            document.getElementById('entryCountColorInput').value = storage.getItem('entryCountColor') || '#3b5bdb';
+            setColorSelection(storage.getItem('entryCountColor') || '#3b5bdb');
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function openExportModal(event) {
+            var dropdown = document.getElementById('exportModal');
+            var btn = event.currentTarget;
+            var rect = btn.getBoundingClientRect();
+            dropdown.classList.add('active');
+            var dropdownWidth = dropdown.offsetWidth || 220;
+            var left = rect.right + 8;
+            if (left + dropdownWidth > window.innerWidth - 8) {
+                left = window.innerWidth - dropdownWidth - 8;
+            }
+            var top = rect.top;
+            var dropdownHeight = dropdown.offsetHeight || 200;
+            if (top + dropdownHeight > window.innerHeight - 8) {
+                top = Math.max(8, window.innerHeight - dropdownHeight - 8);
+            }
+            dropdown.style.left = left + 'px';
+            dropdown.style.top = top + 'px';
+            event.stopPropagation();
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            var dropdown = document.getElementById('exportModal');
+            if (dropdown.classList.contains('active') && !dropdown.contains(event.target)) {
+                closeExportModal();
+            }
+        });
+
+        function runExportAction(action) {
+            closeExportModal();
+            if (action === 'pdf') {
+                exportToPDF();
+            } else if (action === 'pdfChecked') {
+                exportToPDF(true);
+            } else if (action === 'printAll') {
+                printAllRows();
+            } else if (action === 'printChecked') {
+                printCheckedRows();
+            }
+        }
+
+        function setThemeSelection(theme) {
+            var options = document.querySelectorAll('[data-theme]');
+            options.forEach(function(opt) {
+                var isMatch = opt.getAttribute('data-theme') === theme;
+                opt.classList.toggle('selected', isMatch);
+                opt.querySelector('input').checked = isMatch;
+            });
+        }
+
+        function getSelectedTheme() {
+            var checked = document.querySelector('input[name="pdfTheme"]:checked');
+            return checked ? checked.value : 'minimal';
+        }
+
+        function setOrderSelection(order) {
+            var options = document.querySelectorAll('[data-order]');
+            options.forEach(function(opt) {
+                var isMatch = opt.getAttribute('data-order') === order;
+                opt.classList.toggle('selected', isMatch);
+                opt.querySelector('input').checked = isMatch;
+            });
+        }
+
+        function getSelectedOrder() {
+            var checked = document.querySelector('input[name="rowOrder"]:checked');
+            return checked ? checked.value : 'asc';
+        }
+
+        function setDefaultBillTypeSelection(bt) {
+            var options = document.querySelectorAll('#billTypeOptions [data-billtype]');
+            options.forEach(function(opt) {
+                var isMatch = opt.getAttribute('data-billtype') === bt;
+                opt.classList.toggle('selected', isMatch);
+                opt.querySelector('input').checked = isMatch;
+            });
+        }
+
+        function getSelectedDefaultBillType() {
+            var checked = document.querySelector('input[name="defaultBillType"]:checked');
+            return checked ? checked.value : 'fifty';
+        }
+
+        function billTypeLabel(bt) {
+            if (bt === 'ten') return '1만원권';
+            if (bt === 'check') return '수표';
+            return '5만원권';
+        }
+
+        function shortBillTypeLabel(bt) {
+            if (bt === 'ten') return '1만';
+            if (bt === 'check') return '수표';
+            return '5만';
+        }
+
+        function renderTopBillTypeOptions() {
+            var container = document.getElementById('topBillTypeOptions');
+            var infoIcon = document.getElementById('billTypeInfoIcon');
+            if (!container) return;
+            var defaultType = storage.getItem('defaultBillType') || 'fifty';
+            var others = ['fifty', 'ten', 'check'].filter(function(t) { return t !== defaultType; });
+            container.innerHTML = others.map(function(t) {
+                return `<label style="display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="radio" name="billTypeInput" value="${t}" style="width:13px;height:13px;">${shortBillTypeLabel(t)}</label>`;
+            }).join('');
+            if (infoIcon) {
+                infoIcon.title = `기본값(현재: ${billTypeLabel(defaultType)})은 선택 목록에 나타나지 않습니다. 다른 지폐로 받은 경우에만 선택하세요.\n10만원 미만 금액(1~9만원) 중 5만원을 제외한 나머지(1,2,3,4,6,7,8,9만원)는, 지폐 구분을 따로 선택하지 않으면 자동으로 1만원권으로 처리됩니다. 직접 5만원권이나 수표를 선택하면 그 선택이 우선합니다.`;
+            }
+        }
+
+        function isReversedOrder() {
+            return (storage.getItem('rowOrder') || 'asc') === 'desc';
+        }
+
+        function reverseTableOrder() {
+            var tbody = document.getElementById('guestList');
+            var rows = Array.from(tbody.rows).reverse();
+            rows.forEach(function(row) { tbody.appendChild(row); });
+            saveCheckboxStates();
+        }
+
+        function applyRowOrderToDOM() {
+            var tbody = document.getElementById('guestList');
+            var rows = Array.from(tbody.rows);
+            var reversed = isReversedOrder();
+            rows.sort(function(a, b) {
+                var seqA = parseInt(a.cells[0].textContent);
+                var seqB = parseInt(b.cells[0].textContent);
+                if (isNaN(seqA)) seqA = 0;
+                if (isNaN(seqB)) seqB = 0;
+                return reversed ? (seqB - seqA) : (seqA - seqB);
+            });
+            rows.forEach(function(row) { tbody.appendChild(row); });
+        }
+
+        function setColorSelection(color) {
+            document.getElementById('entryCountColorInput').value = color;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.theme-option').forEach(function(opt) {
+                opt.addEventListener('click', function() {
+                    if (opt.hasAttribute('data-theme')) {
+                        setThemeSelection(opt.getAttribute('data-theme'));
+                    } else if (opt.hasAttribute('data-order')) {
+                        setOrderSelection(opt.getAttribute('data-order'));
+                    } else if (opt.hasAttribute('data-billtype')) {
+                        setDefaultBillTypeSelection(opt.getAttribute('data-billtype'));
+                    }
+                });
+            });
+        });
+
+        function saveSettings() {
+            var fontSize = parseFloat(document.getElementById('fontSizeInput').value);
+            if (isNaN(fontSize) || fontSize < 6) fontSize = 9;
+            storage.setItem('pdfFontSize', fontSize);
+            storage.setItem('pdfTheme', getSelectedTheme());
+            storage.setItem('showEntryCount', document.getElementById('showEntryCountInput').checked);
+            storage.setItem('autoSubmitOnSuggestionEnter', document.getElementById('autoSubmitOnSuggestionEnterInput').checked);
+            storage.setItem('enableNewRowHighlight', document.getElementById('enableNewRowHighlightInput').checked);
+            if (!document.getElementById('enableNewRowHighlightInput').checked && lastNewRow) {
+                lastNewRow.classList.remove('row-newest');
+                lastNewRow = null;
+            }
+
+            var highlightSizeVal = parseFloat(document.getElementById('newRowHighlightSizeInput').value);
+            if (isNaN(highlightSizeVal) || highlightSizeVal < 13) highlightSizeVal = 16;
+            storage.setItem('newRowHighlightSize', highlightSizeVal);
+
+            var billIconSizeVal = parseFloat(document.getElementById('billIconSizeInput').value);
+            if (isNaN(billIconSizeVal) || billIconSizeVal < 1) billIconSizeVal = 10;
+            if (billIconSizeVal > 10) billIconSizeVal = 10;
+            storage.setItem('billIconSize', billIconSizeVal);
+
+            updateHighlightAndIconSizes();
+            updateEntryCountVisibility();
+
+            var entryFontSize = parseFloat(document.getElementById('entryCountFontSizeInput').value);
+            if (isNaN(entryFontSize) || entryFontSize < 8) entryFontSize = 20;
+            storage.setItem('entryCountFontSize', entryFontSize);
+            storage.setItem('entryCountColor', document.getElementById('entryCountColorInput').value);
+            updateEntryCountFontSize();
+
+            var prevOrder = storage.getItem('rowOrder') || 'asc';
+            var newOrder = getSelectedOrder();
+            storage.setItem('rowOrder', newOrder);
+
+            storage.setItem('defaultBillType', getSelectedDefaultBillType());
+            renderTopBillTypeOptions();
+
+            storage.setItem('showBillTypeSummary', document.getElementById('showBillTypeSummaryInput').checked);
+            storage.setItem('billTypeSummaryColor', document.getElementById('billTypeSummaryColorInput').value);
+
+            closeSettings();
+
+            if (prevOrder !== newOrder) {
+                reverseTableOrder();
+            }
+        }
+
+        function exportToPDF(onlyChecked) {
+            saveCheckboxStates();
+            var table = document.getElementById('guestList');
+            var rows = Array.from(table.getElementsByTagName('tr'));
+            if (onlyChecked) {
+                rows = rows.filter(function(row) {
+                    return row.cells[4].querySelector('input[type="checkbox"]').checked;
+                });
+                if (rows.length === 0) {
+                    alert('체크된 항목이 없습니다.');
+                    return;
+                }
+            }
+            var totalCount = rows.length;
+            var now = new Date();
+            var dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+            var FONT_SIZE = parseFloat(storage.getItem('pdfFontSize')) || 9;
+            var THEME = storage.getItem('pdfTheme') || 'minimal';
+
+            // 행 데이터 추출
+            var rowData = rows.map(function(row) {
+                var amount = row.cells[2].textContent;
+                var numericAmount = parseInt(amount.replace(/[^\d]/g, ''));
+                return {
+                    name: row.cells[1].textContent,
+                    amount: amount,
+                    note: row.cells[3].textContent,
+                    numeric: isNaN(numericAmount) ? 0 : numericAmount
+                };
+            });
+
+            // 지폐 구분별 합계 금액 계산 (내보내는 항목 기준)
+            var fiftyAmount = 0, tenAmount = 0, checkAmount = 0, summaryTotalAmount = 0;
+            rows.forEach(function(row) {
+                var amt = parseInt(row.cells[2].textContent.replace(/[^\d]/g, ''));
+                if (isNaN(amt)) return;
+                summaryTotalAmount += amt;
+                var bt = row.cells[5].dataset.billtype || 'fifty';
+                if (bt === 'ten') {
+                    tenAmount += amt;
+                } else if (bt === 'check') {
+                    checkAmount += amt;
+                } else {
+                    fiftyAmount += amt;
+                }
+            });
+
+            // CSS 생성 함수 (디자인 테마별)
+            function makeCSS(fs, theme) {
+                var base = `
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    body { font-family: 'Noto Sans KR', sans-serif; }
+    .page { padding: 10mm 12mm 14mm 12mm; }
+    .title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 10px; }
+    .title-deco { display: none; text-align: center; font-size: 8px; margin: -6px 0 8px; letter-spacing: 2px; }
+    table { width: 100%; border-collapse: collapse; font-size: ${fs}px; table-layout: fixed; }
+    thead th { padding: ${Math.round(fs*0.5)}px 5px; font-weight: 600; text-align: center; }
+    tbody td { padding: ${Math.round(fs*0.4)}px 5px; }
+    td.num { text-align: center; width: 4%; }
+    td.name { font-weight: 500; width: 25%; }
+    td.amount { text-align: center; font-weight: 600; width: 17%; }
+    td.note { width: 50%; }
+    .page-footer { margin-top: 6px; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; }
+    .page-date { font-size: 10px; }
+    .page-footer-right { display: flex; align-items: baseline; gap: 12px; }
+    .page-number { font-size: 9px; }
+    .summary-page { padding: 10mm 12mm; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80mm; }
+    .summary-page .title { margin-bottom: 6px; }
+    .subtitle { font-size: 10px; text-align: center; margin-bottom: 30px; }
+    .summary-box { border-radius: 8px; padding: 24px 48px; }
+    .summary-row { display: flex; justify-content: space-between; gap: 40px; font-size: 14px; padding: 10px 0; }
+    .summary-row:last-child { border-bottom: none !important; }
+    .summary-label { font-weight: 500; }
+    .summary-value { font-weight: 700; }
+    .summary-row-bills { justify-content: center; font-size: 7px; gap: 24px; }
+    .summary-row-bills .bill-group { display: flex; align-items: baseline; gap: 4px; }
+    @media print {
+        @page { size: A4 portrait; margin: 8mm 12mm 8mm 12mm; }
+    }`;
+                var themes = {
+                    minimal: `
+    body { background: #ffffff; color: #1a1d23; }
+    .title { color: #1a1d23; }
+    thead th { background: #f1f3f5; border: 1px solid #d8dadf; color: #374151; }
+    tbody td { border: 1px solid #e8eaed; color: #1a1d23; }
+    tbody tr:nth-child(even) td { background: #fafbfc; }
+    td.amount { color: #3b5bdb; }
+    td.note { color: #6b7280; }
+    .page-date, .page-number { color: #9ca3af; }
+    .page-subtotal b { color: #3b5bdb; }
+    .summary-box { border: 1px solid #d8dadf; }
+    .summary-label { color: #6b7280; }
+    .summary-value.total { color: #3b5bdb; font-size: 16px; }
+    .summary-row { border-bottom: 1px solid #e8eaed; }`,
+                    charcoal: `
+    body { background: #ffffff; color: #1a1a1a; }
+    .title { color: #1a1a1a; letter-spacing: 1px; }
+    thead th { background: none; border: none; border-bottom: 2px solid #1a1a1a; color: #1a1a1a; }
+    tbody td { border: none; border-bottom: 0.75px solid #e0e0e0; color: #1a1a1a; }
+    td.amount { color: #1a1a1a; font-weight: 700; }
+    td.note { color: #6b6b6b; }
+    .page-date, .page-number { color: #9a9a9a; }
+    .page-subtotal b { color: #1a1a1a; }
+    .summary-box { border: 1px solid #1a1a1a; }
+    .summary-label { color: #6b6b6b; }
+    .summary-value.total { color: #1a1a1a; font-size: 16px; }
+    .summary-row { border-bottom: 0.75px solid #e0e0e0; }`,
+                    coral: `
+    body { background: #ffffff; color: #2b2b2b; }
+    .title { color: #2b2b2b; }
+    thead th { background: none; border: none; border-bottom: 2px solid #e8590c; color: #2b2b2b; }
+    tbody td { border: none; border-bottom: 0.75px solid #f0e4de; color: #2b2b2b; }
+    td.amount { color: #e8590c; font-weight: 700; }
+    td.note { color: #8a8378; }
+    .page-date, .page-number { color: #b0a89c; }
+    .page-subtotal b { color: #e8590c; }
+    .summary-box { border: 1px solid #e8590c; }
+    .summary-label { color: #8a8378; }
+    .summary-value.total { color: #e8590c; font-size: 16px; }
+    .summary-row { border-bottom: 0.75px solid #f0e4de; }`,
+                    teal: `
+    body { background: #ffffff; color: #21302c; }
+    .title { color: #21302c; }
+    thead th { background: none; border: none; border-bottom: 2px solid #0f9d76; color: #21302c; }
+    tbody td { border: none; border-bottom: 0.75px solid #dbeee7; color: #21302c; }
+    td.amount { color: #0f9d76; font-weight: 700; }
+    td.note { color: #6c8079; }
+    .page-date, .page-number { color: #9db3ac; }
+    .page-subtotal b { color: #0f9d76; }
+    .summary-box { border: 1px solid #0f9d76; }
+    .summary-label { color: #6c8079; }
+    .summary-value.total { color: #0f9d76; font-size: 16px; }
+    .summary-row { border-bottom: 0.75px solid #dbeee7; }`
+                };
+                return base + (themes[theme] || themes.minimal);
+            }
+
+            // hidden iframe에서 실제 행 높이 측정하여 페이지 분할
+            var measureIframe = document.createElement('iframe');
+            measureIframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;border:0;visibility:hidden;';
+            document.body.appendChild(measureIframe);
+
+            var mdoc = measureIframe.contentWindow.document;
+            mdoc.open();
+            mdoc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>${makeCSS(FONT_SIZE, THEME)}</style></head>
+<body class="theme-${THEME}"><div class="page" id="testPage">
+<div class="title">축의금 명부</div>
+<div class="title-deco">・ ・ ・</div>
+<table><thead><tr><th>#</th><th>이름</th><th>금액</th><th>비고</th></tr></thead>
+<tbody id="testBody"></tbody></table>
+<div class="page-footer"><div class="page-date">출력일 : ${dateStr}</div><div class="page-footer-right"><div class="page-subtotal">이 페이지 합계 : <b>0만원</b></div><div class="page-number">1/1</div></div></div>
+</div></body></html>`);
+            mdoc.close();
+
+            // A4 96dpi=1123px, @page 상하여백 8mm*2=60px, .page 패딩 10mm*2=76px, 여유 20px
+            var PAGE_HEIGHT_PX = 1123 - 60 - 76 - 20;
+
+            var pages = [];
+            var currentPage = [];
+            var tbody = mdoc.getElementById('testBody');
+
+            rowData.forEach(function(rd, i) {
+                var tr = mdoc.createElement('tr');
+                tr.innerHTML = `<td class="num">${i+1}</td><td class="name">${escapeHtml(rd.name)}</td><td class="amount">${escapeHtml(rd.amount)}</td><td class="note">${escapeHtml(rd.note)}</td>`;
+                tbody.appendChild(tr);
+
+                if (mdoc.getElementById('testPage').scrollHeight > PAGE_HEIGHT_PX) {
+                    tbody.removeChild(tr);
+                    pages.push(currentPage.slice());
+                    currentPage = [rd];
+                    tbody.innerHTML = `<tr><td class="num">${i+1}</td><td class="name">${escapeHtml(rd.name)}</td><td class="amount">${escapeHtml(rd.amount)}</td><td class="note">${escapeHtml(rd.note)}</td></tr>`;
+                } else {
+                    currentPage.push(rd);
+                }
+            });
+            if (currentPage.length > 0 || pages.length === 0) pages.push(currentPage);
+            document.body.removeChild(measureIframe);
+
+            // 페이지 HTML 생성
+            var totalPages = pages.length + 1;
+            var pagesHtml = pages.map(function(pageRows, pageIdx) {
+                var startNum = pages.slice(0, pageIdx).reduce(function(s, p) { return s + p.length; }, 0);
+                var pageSubtotal = pageRows.reduce(function(s, r) { return s + r.numeric; }, 0);
+                var bodyRows = pageRows.map(function(rd, i) {
+                    return `<tr><td class="num">${startNum+i+1}</td><td class="name">${escapeHtml(rd.name)}</td><td class="amount">${escapeHtml(rd.amount)}</td><td class="note">${escapeHtml(rd.note)}</td></tr>`;
+                }).join('');
+                return `<div class="page">
+    <div class="title">축의금 명부</div>
+    <div class="title-deco">・ ・ ・</div>
+    <table><thead><tr><th>#</th><th style="text-align:left">이름</th><th>금액</th><th style="text-align:left">비고</th></tr></thead>
+    <tbody>${bodyRows}</tbody></table>
+    <div class="page-footer">
+        <div class="page-date">출력일 : ${dateStr}</div>
+        <div class="page-footer-right">
+            <div class="page-subtotal">이 페이지 합계 : <b>${formatAmount(pageSubtotal)}</b></div>
+            <div class="page-number">${pageIdx+1} / ${totalPages}</div>
+        </div>
+    </div>
+</div>`;
+            }).join('<div style="page-break-after:always"></div>');
+
+            var showBillTypeSummary = storage.getItem('showBillTypeSummary') !== 'false';
+            var billTypeSummaryColor = storage.getItem('billTypeSummaryColor') || '#3b5bdb';
+            var billTypeSummaryHTML = showBillTypeSummary ? `
+        <div class="summary-row summary-row-bills">
+            <span class="bill-group"><span class="summary-label">5만원권</span><span class="summary-value" style="color:${billTypeSummaryColor};">${formatAmount(fiftyAmount)}</span></span>
+            <span class="bill-group"><span class="summary-label">1만원권</span><span class="summary-value" style="color:${billTypeSummaryColor};">${formatAmount(tenAmount)}</span></span>
+            <span class="bill-group"><span class="summary-label">수표</span><span class="summary-value" style="color:${billTypeSummaryColor};">${formatAmount(checkAmount)}</span></span>
+        </div>` : '';
+
+            var summaryPage = `<div style="page-break-before:always"></div>
+<div class="summary-page">
+    <div class="title">축의금 명부 - 결산</div>
+    <div class="title-deco">・ ・ ・</div>
+    <div class="subtitle">출력일 : ${dateStr}</div>
+    <div class="summary-box">
+        <div class="summary-row"><span class="summary-label">총 인원</span><span class="summary-value">${totalCount}명</span></div>
+        <div class="summary-row"><span class="summary-label">총 금액</span><span class="summary-value total">${formatAmount(summaryTotalAmount)}</span></div>${billTypeSummaryHTML}
+    </div>
+</div>`;
+
+            var html = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><title>축의금 명부</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>${makeCSS(FONT_SIZE, THEME)}</style>
+</head><body class="theme-${THEME}">${pagesHtml}${summaryPage}
+<` + `script>window.onload=function(){window.focus();window.print()};</` + `script>
+</body></html>`;
+
+            var iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+
+            var doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+
+            iframe.contentWindow.onafterprint = function() {
+                document.body.removeChild(iframe);
+            };
+
+            setTimeout(function() {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 60000);
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+        }
+
+        function loadFromFile(event) {
+            var file = event.target.files[0];
+            currentFileName = file.name;
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var data = new Uint8Array(event.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+                var worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                var json = XLSX.utils.sheet_to_json(worksheet);
+
+                saveHistory();
+                history = history.slice(0, historyIndex + 1);
+                var table = document.getElementById('guestList');
+                table.innerHTML = '';
+                rowIndex = 1;
+                cumulativeTotal = 0;
+                var maxSeq = 0;
+                json.forEach(function(row) {
+                    var seqNum = parseInt(row.순서);
+                    if (!isNaN(seqNum)) maxSeq = Math.max(maxSeq, seqNum);
+                    var amtNum = parseInt(row.금액);
+                    var loadedBillType = applyAutoDetectToLoadedBillType(amtNum, labelToBillType(row));
+                    addRowWithoutHistory(row.이름, amtNum, row.비고, row.체크, false, row.순서, loadedBillType);
+                });
+                if (maxSeq > 0) rowIndex = maxSeq + 1;
+                resetAmountFrequency();
+                applyRowOrderToDOM();
+                updateBillTypeSummary();
+                updateNoteSuggestions();
+                saveHistory();
+                isDataModified = false;
+                saveCheckboxStates();
+                adjustTableMargin();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function scrollToBottom() {
+            if (isReversedOrder()) {
+                window.scrollTo(0, 0);
+            } else {
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+
+        function updateCumulativeTotal() {
+            var table = document.getElementById('guestList');
+            var rows = table.getElementsByTagName('tr');
+            cumulativeTotal = 0;
+            for (var i = 0; i < rows.length; i++) {
+                var amount = parseInt(rows[i].getElementsByTagName('td')[2].textContent.replace(/[^\d]/g, ''));
+                if (!isNaN(amount)) cumulativeTotal += amount;
+            }
+            updateInfoContainer();
+        }
+
+        function updateInfoContainer() {
+            document.getElementById('infoContainer').textContent =
+                `현재 순서: ${rowIndex - 1}  ·  누적: ${formatAmount(cumulativeTotal)}`;
+            updateEntryCountDisplay();
+        }
+
+        function updateEntryCountDisplay() {
+            var count = document.getElementById('guestList').getElementsByTagName('tr').length;
+            var badge = document.getElementById('entryCountBadge');
+            if (badge) badge.textContent = count;
+        }
+
+        function updateEntryCountVisibility() {
+            var show = storage.getItem('showEntryCount') !== 'false';
+            var badge = document.getElementById('entryCountBadge');
+            if (badge) badge.classList.toggle('hidden', !show);
+        }
+
+        function updateEntryCountFontSize() {
+            var size = parseFloat(storage.getItem('entryCountFontSize')) || 20;
+            var color = storage.getItem('entryCountColor') || '#3b5bdb';
+            var badge = document.getElementById('entryCountBadge');
+            if (badge) {
+                badge.style.fontSize = size + 'px';
+                badge.style.color = color;
+            }
+        }
+
+        function updateHighlightAndIconSizes() {
+            var highlightSize = parseFloat(storage.getItem('newRowHighlightSize')) || 16;
+            document.documentElement.style.setProperty('--new-row-highlight-size', highlightSize + 'px');
+
+            var level = parseFloat(storage.getItem('billIconSize')) || 10;
+            if (level < 1) level = 1;
+            if (level > 10) level = 10;
+            var baseHeight = 8 + level * 1.8;
+            var highlightedHeight = baseHeight + 8;
+            document.documentElement.style.setProperty('--bill-icon-height', baseHeight + 'px');
+            document.documentElement.style.setProperty('--bill-icon-height-highlighted', highlightedHeight + 'px');
+        }
+
+        function resetAutoSaveInterval() {
+            if (isAutoSaveEnabled) {
+                clearInterval(autoSaveInterval);
+                autoSaveInterval = setInterval(saveData, 300000);
+            }
+        }
+
+        function toggleAutoSave() {
+            isAutoSaveEnabled = !isAutoSaveEnabled;
+            const badge = document.getElementById('autosaveBadge');
+            if (isAutoSaveEnabled) {
+                badge.classList.add('active');
+                resetAutoSaveInterval();
+            } else {
+                badge.classList.remove('active');
+                clearInterval(autoSaveInterval);
+            }
+        }
+
+        function updateAutoSaveInfo() {
+            document.getElementById('autosaveInfo').textContent = `${getCurrentDateTime()} 저장됨`;
+        }
+
+        function calculateTotal() {
+            var startRow = parseInt(document.getElementById('startRow').value);
+            var endRow = parseInt(document.getElementById('endRow').value);
+            var table = document.getElementById('guestList');
+            var rows = table.getElementsByTagName('tr');
+            var total = 0;
+            for (var i = startRow - 1; i < endRow; i++) {
+                var amount = parseInt(rows[i].getElementsByTagName('td')[2].textContent.replace(/[^\d]/g, ''));
+                if (!isNaN(amount)) total += amount;
+            }
+            document.getElementById('totalAmount').textContent = `총금액: ${formatAmount(total)}`;
+        }
+
+        document.getElementById('startRow').addEventListener('input', calculateTotal);
+        document.getElementById('endRow').addEventListener('input', calculateTotal);
+
+        function undoEntry() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreHistory(historyIndex);
+                resetAmountFrequency();
+                isDataModified = true;
+            }
+        }
+
+        function redoEntry() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreHistory(historyIndex);
+                resetAmountFrequency();
+                isDataModified = true;
+            }
+        }
+
+        function printCheckedRows() {
+            saveCheckboxStates();
+            const rows = Array.from(document.getElementById('guestList').rows);
+            const checkedRows = rows.filter(row => row.cells[4].querySelector('input[type="checkbox"]').checked);
+            const printContent = buildPrintTable(checkedRows);
+            doPrint(printContent);
+        }
+
+        function printAllRows() {
+            saveCheckboxStates();
+            const rows = Array.from(document.getElementById('guestList').rows);
+            const printContent = buildPrintTable(rows);
+            doPrint(printContent);
+        }
+
+        function buildPrintTable(rows) {
+            return `<table style="width:100%;border-collapse:collapse;font-size:10px;">
+                <thead><tr>
+                    <th style="border:1px solid #ccc;padding:6px 8px;">#</th>
+                    <th style="border:1px solid #ccc;padding:6px 8px;">이름</th>
+                    <th style="border:1px solid #ccc;padding:6px 8px;">금액</th>
+                    <th style="border:1px solid #ccc;padding:6px 8px;">비고</th>
+                </tr></thead>
+                <tbody>
+                    ${rows.map((row, i) => `<tr>
+                        <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;">${i+1}</td>
+                        <td style="border:1px solid #ccc;padding:6px 8px;">${row.cells[1].textContent}</td>
+                        <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;">${row.cells[2].textContent}</td>
+                        <td style="border:1px solid #ccc;padding:6px 8px;">${row.cells[3].textContent}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+        }
+
+        function doPrint(content) {
+            const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>축의금 명부</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; padding: 16px; }
+    @page { size: A4 portrait; margin: 16mm 14mm; }
+</style>
+</head>
+<body>
+    ${content}
+    <` + `script>
+        window.onload = function() {
+            window.focus();
+            window.print();
+        };
+    </` + `script>
+</body>
+</html>`;
+
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+
+            iframe.contentWindow.onafterprint = function() {
+                document.body.removeChild(iframe);
+            };
+
+            setTimeout(function() {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 60000);
+        }
+
+        function toggleAllChecks(headerCheckbox) {
+            var checked = headerCheckbox.checked;
+            document.getElementById('guestList').querySelectorAll('input.print-check').forEach(cb => cb.checked = checked);
+            saveCheckboxStates();
+        }
+
+        function syncHeaderCheckbox() {
+            var headerCheckbox = document.getElementById('checkAllHeader');
+            if (!headerCheckbox) return;
+            var boxes = document.getElementById('guestList').querySelectorAll('input.print-check');
+            headerCheckbox.checked = boxes.length > 0 && Array.from(boxes).every(cb => cb.checked);
+        }
+
+        function addEventListeners() {
+            const rows = document.getElementById('guestList').getElementsByTagName('tr');
+            for (let row of rows) {
+                const noteCell = row.cells[3];
+                const checkboxCell = row.cells[4];
+                noteCell.removeEventListener('click', handleNoteCellClick);
+                noteCell.addEventListener('click', handleNoteCellClick);
+                checkboxCell.removeEventListener('click', handleCheckboxCellClick);
+                checkboxCell.addEventListener('click', handleCheckboxCellClick);
+            }
+        }
+
+        function handleNoteCellClick(event) { editCell(event.currentTarget); }
+        function handleCheckboxCellClick(event) {
+            if (event.target.tagName !== 'INPUT') {
+                const cb = event.currentTarget.querySelector('input[type="checkbox"]');
+                cb.checked = !cb.checked;
+                saveCheckboxStates();
+            }
+        }
+
+        function resetAmountFrequency() {
+            amountFrequency = {};
+            const rows = document.getElementById('guestList').getElementsByTagName('tr');
+            for (let row of rows) {
+                const amount = parseInt(row.cells[2].textContent.replace(/[^\d]/g, ''));
+                if (!isNaN(amount)) updateAmountFrequency(amount, true);
+            }
+            displayAmountFrequency();
+        }
+
+        document.addEventListener('DOMContentLoaded', addEventListeners);
+    </script>
+</body>
+</html>
