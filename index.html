@@ -24,10 +24,10 @@
             --success: #2f9e44;
             --success-light: #ebfbee;
             --warning: #e8590c;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-            --radius: 10px;
-            --radius-sm: 6px;
+            --shadow-sm: 0 2px 8px rgba(30,41,59,0.05), 0 1px 2px rgba(30,41,59,0.03);
+            --shadow-md: 0 8px 24px rgba(30,41,59,0.08), 0 2px 6px rgba(30,41,59,0.04);
+            --radius: 16px;
+            --radius-sm: 10px;
             --header-h: 56px;
             --panel-h: 130px;
         }
@@ -232,6 +232,18 @@
             line-height: 1;
         }
         .entry-count-badge.hidden { display: none; }
+        .palette-swatch-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.08) inset;
+            transition: transform .1s;
+        }
+        .palette-swatch-btn:hover { transform: scale(1.12); }
+        .palette-swatch-btn.selected { border-color: var(--text-primary); }
         .bill-type-icon {
             height: var(--bill-icon-height, 26px);
             width: auto;
@@ -583,39 +595,18 @@
             </div>
             <div class="modal-field">
                 <label for="newRowHighlightSizeInput">강조 효과 크기 (px)</label>
-                <input type="number" id="newRowHighlightSizeInput" min="13" max="30" step="1" value="16">
+                <input type="number" id="newRowHighlightSizeInput" min="13" max="30" step="1" value="22">
             </div>
             <div class="modal-field">
-                <label for="billIconSizeInput">지폐 이미지 크기 (1~10단계, 현재값: 10)</label>
-                <input type="number" id="billIconSizeInput" min="1" max="10" step="1" value="10">
+                <label for="billIconSizeInput">지폐 이미지 크기 (1~10단계, 현재값: 4)</label>
+                <input type="number" id="billIconSizeInput" min="1" max="10" step="1" value="4">
             </div>
             <div class="modal-hint">숫자가 클수록 표의 지폐/수표 이미지가 크게 표시됩니다.</div>
-            <div class="modal-field">
-                <label>지폐/수표 이미지 링크</label>
-                <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">5만원권</span>
-                        <input type="text" id="billImageFiftyInput" placeholder="이미지 URL" style="flex:1;">
-                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('fifty')">적용</button>
-                    </div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">1만원권</span>
-                        <input type="text" id="billImageTenInput" placeholder="이미지 URL" style="flex:1;">
-                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('ten')">적용</button>
-                    </div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <span style="font-size:11px;color:var(--text-secondary);width:52px;flex-shrink:0;">수표</span>
-                        <input type="text" id="billImageCheckInput" placeholder="이미지 URL" style="flex:1;">
-                        <button class="btn btn-ghost" style="padding:6px 10px;flex-shrink:0;" onclick="applyBillImage('check')">적용</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-hint">이미지가 안 보이면 여기서 새 링크로 바로 교체할 수 있습니다 (칸을 비우고 적용하면 기본 이미지로 되돌아갑니다).</div>
             <div class="modal-field">
                 <div style="display:flex;gap:16px;">
                     <div style="flex:1;">
                         <label for="entryCountFontSizeInput">입력 번호 폰트 크기 (px)</label>
-                        <input type="number" id="entryCountFontSizeInput" min="12" max="60" step="1" value="20">
+                        <input type="number" id="entryCountFontSizeInput" min="12" max="60" step="1" value="50">
                     </div>
                     <div style="flex:1;">
                         <label for="entryCountColorInput">입력 번호 색상</label>
@@ -649,6 +640,17 @@
                 </div>
             </div>
             <div class="modal-hint">PDF로 내보내기 및 인쇄 시 적용될 디자인입니다.</div>
+            <div class="modal-field">
+                <label for="customPaletteInput">앱 색상 커스터마이징 (CSS 변수 붙여넣기)</label>
+                <textarea id="customPaletteInput" rows="6" style="width:100%;font-family:monospace;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);resize:vertical;background:var(--bg);color:var(--text-primary);"></textarea>
+                <div id="paletteSwatches" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button class="btn btn-primary" onclick="applyPastedPalette()">색상 적용</button>
+                    <button class="btn btn-ghost" onclick="resetPaletteToDefault()">기본 팔레트로 되돌리기</button>
+                </div>
+            </div>
+            <div class="modal-hint">동그라미를 누르면 해당 테마가 위 칸에 채워집니다. 원하면 직접 수정한 뒤 "색상 적용"을 눌러 반영하세요.</div>
+            <div class="modal-hint">bairesdev.com/tools/ai-colors 같은 곳에서 export한 <code>--primary-100</code> 등 CSS 변수 텍스트를 그대로 붙여넣고 "색상 적용"을 누르면 앱 전체 색상에 반영됩니다.</div>
             <div class="modal-actions">
                 <button class="btn btn-ghost" onclick="closeSettings()">취소</button>
                 <button class="btn btn-primary" onclick="saveSettings()">확인</button>
@@ -779,6 +781,257 @@
 
         let rowIndex = 1;
         let lastNewRow = null;
+
+        var PRESET_PALETTES = [
+`--primary-100:#c21d03;
+--primary-200:#fd5732;
+--primary-300:#ffb787;
+--accent-100:#393939;
+--accent-200:#bebebe;
+--text-100:#232121;
+--text-200:#4b4848;
+--bg-100:#fbfbfb;
+--bg-200:#f1f1f1;
+--bg-300:#c8c8c8;`,
+`--primary-100:#1F3A5F;
+--primary-200:#4d648d;
+--primary-300:#acc2ef;
+--accent-100:#3D5A80;
+--accent-200:#cee8ff;
+--text-100:#FFFFFF;
+--text-200:#e0e0e0;
+--bg-100:#0F1C2E;
+--bg-200:#1f2b3e;
+--bg-300:#374357;`,
+`--primary-100:#de283b;
+--primary-200:#ff6366;
+--primary-300:#ffccc4;
+--accent-100:#25b1bf;
+--accent-200:#005461;
+--text-100:#1a1a1a;
+--text-200:#404040;
+--bg-100:#ffffff;
+--bg-200:#f5f5f5;
+--bg-300:#cccccc;`,
+`--primary-100:#FF4081;
+--primary-200:#ff79b0;
+--primary-300:#ffe4ff;
+--accent-100:#00E5FF;
+--accent-200:#00829b;
+--text-100:#333333;
+--text-200:#5c5c5c;
+--bg-100:#F5F5F5;
+--bg-200:#ebebeb;
+--bg-300:#c2c2c2;`,
+`--primary-100:#3F51B5;
+--primary-200:#757de8;
+--primary-300:#dedeff;
+--accent-100:#2196F3;
+--accent-200:#003f8f;
+--text-100:#333333;
+--text-200:#5c5c5c;
+--bg-100:#FFFFFF;
+--bg-200:#f5f5f5;
+--bg-300:#cccccc;`,
+`--primary-100:#019b98;
+--primary-200:#55ccc9;
+--primary-300:#c1ffff;
+--accent-100:#dd0025;
+--accent-200:#ffbfab;
+--text-100:#014e60;
+--text-200:#3f7a8d;
+--bg-100:#fbfbfb;
+--bg-200:#f1f1f1;
+--bg-300:#c8c8c8;`,
+`--primary-100:#0077C2;
+--primary-200:#59a5f5;
+--primary-300:#c8ffff;
+--accent-100:#00BFFF;
+--accent-200:#00619a;
+--text-100:#333333;
+--text-200:#5c5c5c;
+--bg-100:#FFFFFF;
+--bg-200:#f5f5f5;
+--bg-300:#cccccc;`,
+`--primary-100:#FFFFFF;
+--primary-200:#e0e0e0;
+--primary-300:#9b9b9b;
+--accent-100:#FFD700;
+--accent-200:#917800;
+--text-100:#FFFFFF;
+--text-200:#e0e0e0;
+--bg-100:#0F1626;
+--bg-200:#1e2436;
+--bg-300:#363c4e;`
+        ];
+
+        function renderPaletteSwatches() {
+            var container = document.getElementById('paletteSwatches');
+            if (!container) return;
+            container.innerHTML = PRESET_PALETTES.map(function(text, idx) {
+                var vars = parsePaletteVars(text);
+                var color = vars['primary-100'] || '#999999';
+                return `<button type="button" class="palette-swatch-btn" style="background:${color};" title="테마 ${idx + 1}" onclick="insertPresetPalette(${idx})"></button>`;
+            }).join('');
+        }
+
+        function insertPresetPalette(idx) {
+            document.getElementById('customPaletteInput').value = PRESET_PALETTES[idx];
+            document.querySelectorAll('.palette-swatch-btn').forEach(function(btn, i) {
+                btn.classList.toggle('selected', i === idx);
+            });
+        }
+
+        var DEFAULT_PALETTE_TEXT = `--primary-100:#5b8bab;
+--primary-200:#8fb0c6;
+--primary-300:#eaf1f5;
+--accent-100:#7fa9c9;
+--accent-200:#446f89;
+--text-100:#26343f;
+--text-200:#6b7c8a;
+--bg-100:#ffffff;
+--bg-200:#faf9f5;
+--bg-300:#e3e6e8;`;
+
+        function lightenHex(hex, amount) {
+            hex = (hex || '').replace('#', '').trim();
+            if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+            if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+            var r = parseInt(hex.substr(0, 2), 16);
+            var g = parseInt(hex.substr(2, 2), 16);
+            var b = parseInt(hex.substr(4, 2), 16);
+            r = Math.round(r + (255 - r) * amount);
+            g = Math.round(g + (255 - g) * amount);
+            b = Math.round(b + (255 - b) * amount);
+            return '#' + [r, g, b].map(function(v) {
+                var s = v.toString(16);
+                return s.length === 1 ? '0' + s : s;
+            }).join('');
+        }
+
+        function darkenHex(hex, amount) {
+            hex = (hex || '').replace('#', '').trim();
+            if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+            if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+            var r = parseInt(hex.substr(0, 2), 16);
+            var g = parseInt(hex.substr(2, 2), 16);
+            var b = parseInt(hex.substr(4, 2), 16);
+            r = Math.round(r * (1 - amount));
+            g = Math.round(g * (1 - amount));
+            b = Math.round(b * (1 - amount));
+            return '#' + [r, g, b].map(function(v) {
+                var s = v.toString(16);
+                return s.length === 1 ? '0' + s : s;
+            }).join('');
+        }
+
+        function normalizeHex(hex) {
+            hex = (hex || '').replace('#', '').trim();
+            if (hex.length === 3) hex = hex.split('').map(function(c) { return c + c; }).join('');
+            return /^[0-9a-fA-F]{6}$/.test(hex) ? hex : null;
+        }
+
+        function relativeLuminance(hex) {
+            var h = normalizeHex(hex);
+            if (!h) return null;
+            var chans = [0, 2, 4].map(function(i) {
+                var v = parseInt(h.substr(i, 2), 16) / 255;
+                return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * chans[0] + 0.7152 * chans[1] + 0.0722 * chans[2];
+        }
+
+        function contrastRatio(hex1, hex2) {
+            var l1 = relativeLuminance(hex1);
+            var l2 = relativeLuminance(hex2);
+            if (l1 === null || l2 === null) return null;
+            var lighter = Math.max(l1, l2);
+            var darker = Math.min(l1, l2);
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        function ensureContrast(fgHex, bgHex, minRatio) {
+            if (!fgHex || !bgHex) return fgHex;
+            var ratio = contrastRatio(fgHex, bgHex);
+            if (ratio === null || ratio >= minRatio) return fgHex;
+            var bgLum = relativeLuminance(bgHex);
+            var goingDarker = bgLum > 0.5;
+            var current = fgHex;
+            for (var i = 0; i < 25; i++) {
+                var next = goingDarker ? darkenHex(current, 0.08) : lightenHex(current, 0.08);
+                if (!next) break;
+                current = next;
+                var newRatio = contrastRatio(current, bgHex);
+                if (newRatio !== null && newRatio >= minRatio) break;
+            }
+            return current;
+        }
+
+        function parsePaletteVars(text) {
+            var vars = {};
+            var regex = /--([\w-]+)\s*:\s*([^;]+);/g;
+            var match;
+            while ((match = regex.exec(text)) !== null) {
+                vars[match[1].trim()] = match[2].trim();
+            }
+            return vars;
+        }
+
+        function applyCustomPalette(text) {
+            var vars = parsePaletteVars(text);
+            var root = document.documentElement.style;
+
+            var surfaceColor = vars['bg-100'] || '#ffffff';
+            var bgColor = vars['bg-200'] || '#f7f8fa';
+
+            var accentColor = vars['primary-100'];
+            if (accentColor) {
+                accentColor = ensureContrast(accentColor, surfaceColor, 3) || accentColor;
+                accentColor = ensureContrast(accentColor, bgColor, 3) || accentColor;
+                root.setProperty('--accent', accentColor);
+            }
+            if (vars['primary-300']) root.setProperty('--accent-light', vars['primary-300']);
+            if (vars['accent-200']) {
+                var accentHover = ensureContrast(vars['accent-200'], surfaceColor, 3) || vars['accent-200'];
+                root.setProperty('--accent-hover', accentHover);
+            }
+
+            if (vars['text-100']) {
+                var textPrimary = ensureContrast(vars['text-100'], surfaceColor, 4.5) || vars['text-100'];
+                textPrimary = ensureContrast(textPrimary, bgColor, 4.5) || textPrimary;
+                root.setProperty('--text-primary', textPrimary);
+            }
+            if (vars['text-200']) {
+                var textSecondary = ensureContrast(vars['text-200'], surfaceColor, 3) || vars['text-200'];
+                textSecondary = ensureContrast(textSecondary, bgColor, 3) || textSecondary;
+                root.setProperty('--text-secondary', textSecondary);
+                root.setProperty('--text-muted', textSecondary);
+            }
+
+            root.setProperty('--surface', surfaceColor);
+            root.setProperty('--bg', bgColor);
+            if (vars['bg-300']) {
+                root.setProperty('--border', vars['bg-300']);
+                var lighter = lightenHex(vars['bg-300'], 0.5);
+                if (lighter) root.setProperty('--border-light', lighter);
+            }
+        }
+
+        function applyPastedPalette() {
+            var text = document.getElementById('customPaletteInput').value;
+            if (!text.trim()) return;
+            applyCustomPalette(text);
+            storage.setItem('customPaletteRaw', text);
+        }
+
+        function resetPaletteToDefault() {
+            var root = document.documentElement.style;
+            ['--accent', '--accent-light', '--accent-hover', '--text-primary', '--text-secondary', '--text-muted', '--surface', '--bg', '--border', '--border-light'].forEach(function(v) {
+                root.removeProperty(v);
+            });
+            storage.removeItem('customPaletteRaw');
+            document.getElementById('customPaletteInput').value = '';
+        }
         let cumulativeTotal = 0;
         let currentFileName = null;
         let autoSaveInterval = null;
@@ -814,6 +1067,11 @@
             updateNoteSuggestions();
             updateHighlightAndIconSizes();
             renderTopBillTypeOptions();
+            var savedPalette = storage.getItem('customPaletteRaw');
+            var paletteToApply = savedPalette !== null ? savedPalette : DEFAULT_PALETTE_TEXT;
+            applyCustomPalette(paletteToApply);
+            var paletteInput = document.getElementById('customPaletteInput');
+            if (paletteInput) paletteInput.value = paletteToApply;
         });
 
         function saveCheckboxStates() {
@@ -1007,42 +1265,15 @@
         }
 
         var BILL_TYPE_IMAGES = {
-            fifty: 'https://BlackPB.github.io/image-host/5m.png',
-            ten: 'https://BlackPB.github.io/image-host/1m.png',
-            check: 'https://BlackPB.github.io/image-host/10m.png'
+            fifty: 'https://BlackPB.github.io/marrybill/5m.png',
+            ten: 'https://BlackPB.github.io/marrybill/1m.png',
+            check: 'https://BlackPB.github.io/marrybill/10m.png'
         };
-
-        function getBillImageUrl(bt) {
-            var storageKey = bt === 'ten' ? 'billImageTen' : (bt === 'check' ? 'billImageCheck' : 'billImageFifty');
-            return storage.getItem(storageKey) || BILL_TYPE_IMAGES[bt] || BILL_TYPE_IMAGES.fifty;
-        }
-
-        function applyBillImage(bt) {
-            var inputId = bt === 'ten' ? 'billImageTenInput' : (bt === 'check' ? 'billImageCheckInput' : 'billImageFiftyInput');
-            var storageKey = bt === 'ten' ? 'billImageTen' : (bt === 'check' ? 'billImageCheck' : 'billImageFifty');
-            var url = document.getElementById(inputId).value.trim();
-            if (url) {
-                storage.setItem(storageKey, url);
-            } else {
-                storage.removeItem(storageKey);
-            }
-            refreshAllBillTypeIcons();
-        }
-
-        function refreshAllBillTypeIcons() {
-            var rows = document.getElementById('guestList').getElementsByTagName('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var cell = rows[i].cells[5];
-                var bt = cell.dataset.billtype || 'fifty';
-                cell.innerHTML = billTypeMarkHTML(bt);
-                cell.dataset.billtype = bt;
-            }
-        }
 
         function billTypeMarkHTML(bt) {
             var t = bt || 'fifty';
             var label = billTypeLabel(t);
-            var src = getBillImageUrl(t);
+            var src = BILL_TYPE_IMAGES[t] || BILL_TYPE_IMAGES.fifty;
             return `<img src="${src}" alt="${label}" title="${label}" class="bill-type-icon" loading="lazy">`;
         }
 
@@ -1395,9 +1626,12 @@
         function openSettings() {
             var savedFont = parseFloat(storage.getItem('pdfFontSize')) || 9;
             document.getElementById('fontSizeInput').value = savedFont;
+            var savedPaletteText = storage.getItem('customPaletteRaw');
+            document.getElementById('customPaletteInput').value = savedPaletteText !== null ? savedPaletteText : DEFAULT_PALETTE_TEXT;
+            renderPaletteSwatches();
             var savedTheme = storage.getItem('pdfTheme') || 'minimal';
             setThemeSelection(savedTheme);
-            var savedOrder = storage.getItem('rowOrder') || 'asc';
+            var savedOrder = storage.getItem('rowOrder') || 'desc';
             setOrderSelection(savedOrder);
             setDefaultBillTypeSelection(storage.getItem('defaultBillType') || 'fifty');
             document.getElementById('showBillTypeSummaryInput').checked = storage.getItem('showBillTypeSummary') !== 'false';
@@ -1405,12 +1639,9 @@
             document.getElementById('showEntryCountInput').checked = storage.getItem('showEntryCount') !== 'false';
             document.getElementById('autoSubmitOnSuggestionEnterInput').checked = storage.getItem('autoSubmitOnSuggestionEnter') !== 'false';
             document.getElementById('enableNewRowHighlightInput').checked = storage.getItem('enableNewRowHighlight') !== 'false';
-            document.getElementById('newRowHighlightSizeInput').value = parseFloat(storage.getItem('newRowHighlightSize')) || 16;
-            document.getElementById('billIconSizeInput').value = parseFloat(storage.getItem('billIconSize')) || 10;
-            document.getElementById('billImageFiftyInput').value = getBillImageUrl('fifty');
-            document.getElementById('billImageTenInput').value = getBillImageUrl('ten');
-            document.getElementById('billImageCheckInput').value = getBillImageUrl('check');
-            document.getElementById('entryCountFontSizeInput').value = parseFloat(storage.getItem('entryCountFontSize')) || 20;
+            document.getElementById('newRowHighlightSizeInput').value = parseFloat(storage.getItem('newRowHighlightSize')) || 22;
+            document.getElementById('billIconSizeInput').value = parseFloat(storage.getItem('billIconSize')) || 4;
+            document.getElementById('entryCountFontSizeInput').value = parseFloat(storage.getItem('entryCountFontSize')) || 50;
             document.getElementById('entryCountColorInput').value = storage.getItem('entryCountColor') || '#3b5bdb';
             setColorSelection(storage.getItem('entryCountColor') || '#3b5bdb');
             document.getElementById('settingsModal').classList.add('active');
@@ -1489,7 +1720,7 @@
 
         function getSelectedOrder() {
             var checked = document.querySelector('input[name="rowOrder"]:checked');
-            return checked ? checked.value : 'asc';
+            return checked ? checked.value : 'desc';
         }
 
         function setDefaultBillTypeSelection(bt) {
@@ -1533,7 +1764,7 @@
         }
 
         function isReversedOrder() {
-            return (storage.getItem('rowOrder') || 'asc') === 'desc';
+            return (storage.getItem('rowOrder') || 'desc') === 'desc';
         }
 
         function reverseTableOrder() {
@@ -1589,11 +1820,11 @@
             }
 
             var highlightSizeVal = parseFloat(document.getElementById('newRowHighlightSizeInput').value);
-            if (isNaN(highlightSizeVal) || highlightSizeVal < 13) highlightSizeVal = 16;
+            if (isNaN(highlightSizeVal) || highlightSizeVal < 13) highlightSizeVal = 22;
             storage.setItem('newRowHighlightSize', highlightSizeVal);
 
             var billIconSizeVal = parseFloat(document.getElementById('billIconSizeInput').value);
-            if (isNaN(billIconSizeVal) || billIconSizeVal < 1) billIconSizeVal = 10;
+            if (isNaN(billIconSizeVal) || billIconSizeVal < 1) billIconSizeVal = 4;
             if (billIconSizeVal > 10) billIconSizeVal = 10;
             storage.setItem('billIconSize', billIconSizeVal);
 
@@ -1606,7 +1837,7 @@
             storage.setItem('entryCountColor', document.getElementById('entryCountColorInput').value);
             updateEntryCountFontSize();
 
-            var prevOrder = storage.getItem('rowOrder') || 'asc';
+            var prevOrder = storage.getItem('rowOrder') || 'desc';
             var newOrder = getSelectedOrder();
             storage.setItem('rowOrder', newOrder);
 
@@ -1964,7 +2195,7 @@
         }
 
         function updateEntryCountFontSize() {
-            var size = parseFloat(storage.getItem('entryCountFontSize')) || 20;
+            var size = parseFloat(storage.getItem('entryCountFontSize')) || 50;
             var color = storage.getItem('entryCountColor') || '#3b5bdb';
             var badge = document.getElementById('entryCountBadge');
             if (badge) {
@@ -1974,10 +2205,10 @@
         }
 
         function updateHighlightAndIconSizes() {
-            var highlightSize = parseFloat(storage.getItem('newRowHighlightSize')) || 16;
+            var highlightSize = parseFloat(storage.getItem('newRowHighlightSize')) || 22;
             document.documentElement.style.setProperty('--new-row-highlight-size', highlightSize + 'px');
 
-            var level = parseFloat(storage.getItem('billIconSize')) || 10;
+            var level = parseFloat(storage.getItem('billIconSize')) || 4;
             if (level < 1) level = 1;
             if (level > 10) level = 10;
             var baseHeight = 8 + level * 1.8;
