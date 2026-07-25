@@ -523,6 +523,15 @@
             font-size: 13px;
             font-family: inherit;
         }
+        .modal-field select {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
         .modal-hint {
             font-size: 11px;
             color: var(--text-muted);
@@ -651,35 +660,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="settings-cell full-width">
-                    <div class="modal-field">
-                        <label>PDF 디자인</label>
-                        <div class="theme-options" id="themeOptions">
-                            <label class="theme-option" data-theme="minimal">
-                                <input type="radio" name="pdfTheme" value="minimal">
-                                <span class="theme-swatch" style="background:#3b5bdb;"></span>
-                                <span>미니멀 화이트</span>
-                            </label>
-                            <label class="theme-option" data-theme="charcoal">
-                                <input type="radio" name="pdfTheme" value="charcoal">
-                                <span class="theme-swatch" style="background:#2b2d31;"></span>
-                                <span>모던 차콜</span>
-                            </label>
-                            <label class="theme-option" data-theme="coral">
-                                <input type="radio" name="pdfTheme" value="coral">
-                                <span class="theme-swatch" style="background:#e8590c;"></span>
-                                <span>모던 코럴</span>
-                            </label>
-                            <label class="theme-option" data-theme="teal">
-                                <input type="radio" name="pdfTheme" value="teal">
-                                <span class="theme-swatch" style="background:#0f9d76;"></span>
-                                <span>모던 틸</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-hint">PDF로 내보내기 및 인쇄 시 적용될 디자인입니다.</div>
-                </div>
-                <div class="settings-cell full-width">
+                <div class="settings-cell">
                     <div class="modal-field">
                         <label for="customPaletteInput">앱 색상 커스터마이징 (CSS 변수 붙여넣기)</label>
                         <textarea id="customPaletteInput" rows="6" style="width:100%;font-family:monospace;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);resize:vertical;background:var(--bg);color:var(--text-primary);"></textarea>
@@ -706,6 +687,123 @@
         <button class="btn btn-ghost" onclick="runExportAction('pdfChecked')">📄 체크 항목만 PDF로 내보내기</button>
         <button class="btn btn-ghost" onclick="runExportAction('printAll')">🖨 전체 인쇄</button>
         <button class="btn btn-ghost" onclick="runExportAction('printChecked')">🖨 체크 항목만 인쇄</button>
+        <div class="sep" style="width:100%;height:1px;margin:4px 0;"></div>
+        <button class="btn btn-ghost" onclick="closeExportModal(); openPdfLayoutModal();">⚙️ PDF 화면설정</button>
+    </div>
+
+    <!-- PDF LAYOUT SETTINGS MODAL -->
+    <div class="modal-overlay" id="pdfLayoutModal">
+        <div class="modal-box" style="width:720px;">
+            <div class="modal-title">🖨 PDF 화면설정</div>
+            <div class="modal-field">
+                <label>미리보기</label>
+                <div id="pdfLayoutPreview" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;background:#ffffff;overflow-x:auto;"></div>
+            </div>
+            <div class="modal-field">
+                <div style="display:flex;gap:16px;">
+                    <div style="flex:1;">
+                        <label for="pdfTitleSizeInput">제목 크기 (px)</label>
+                        <input type="number" id="pdfTitleSizeInput" min="10" max="40" step="1" value="20" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="pdfTitleColorInput">제목 색상</label>
+                        <input type="color" id="pdfTitleColorInput" value="#1a1a1a" style="width:100%;height:34px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="pdfHeaderFontSizeInput">헤더 폰트 크기 (px)</label>
+                        <input type="number" id="pdfHeaderFontSizeInput" min="6" max="24" step="0.5" value="12" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="flex:1;">
+                        <label for="pdfHeaderColorInput">헤더 색상</label>
+                        <input type="color" id="pdfHeaderColorInput" value="#374151" style="width:100%;height:34px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-field">
+                <label>PDF 디자인</label>
+                <div class="theme-options" id="themeOptions">
+                    <label class="theme-option" data-theme="minimal">
+                        <input type="radio" name="pdfTheme" value="minimal">
+                        <span class="theme-swatch" style="background:#3b5bdb;"></span>
+                        <span>미니멀 화이트</span>
+                    </label>
+                    <label class="theme-option" data-theme="charcoal">
+                        <input type="radio" name="pdfTheme" value="charcoal">
+                        <span class="theme-swatch" style="background:#2b2d31;"></span>
+                        <span>모던 차콜</span>
+                    </label>
+                    <label class="theme-option" data-theme="coral">
+                        <input type="radio" name="pdfTheme" value="coral">
+                        <span class="theme-swatch" style="background:#e8590c;"></span>
+                        <span>모던 코럴</span>
+                    </label>
+                    <label class="theme-option" data-theme="teal">
+                        <input type="radio" name="pdfTheme" value="teal">
+                        <span class="theme-swatch" style="background:#0f9d76;"></span>
+                        <span>모던 틸</span>
+                    </label>
+                </div>
+                <div class="modal-hint" style="margin-top:6px;margin-bottom:0;">테마의 색상 위에 위에서 정한 제목/헤더/항목별 설정이 덧씌워집니다.</div>
+            </div>
+            <div class="modal-field">
+                <label>항목별 너비 · 정렬 · 폰트크기 · 색상</label>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;font-size:11px;color:var(--text-secondary);font-weight:600;">
+                        <span></span><span>너비(%)</span><span>정렬</span><span>폰트(px)</span><span>색상</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                        <span style="font-size:12px;">순서</span>
+                        <input type="number" id="pdfColNumWidth" min="0.5" max="50" step="0.1" value="10" oninput="updatePdfLayoutPreview()">
+                        <select id="pdfColNumAlign" onchange="updatePdfLayoutPreview()">
+                            <option value="left">왼쪽</option>
+                            <option value="center">가운데</option>
+                            <option value="right">오른쪽</option>
+                        </select>
+                        <input type="number" id="pdfColNumFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <input type="color" id="pdfColNumColor" value="#1a1a1a" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                        <span style="font-size:12px;">이름</span>
+                        <input type="number" id="pdfColNameWidth" min="0.5" max="80" step="0.1" value="25" oninput="updatePdfLayoutPreview()">
+                        <select id="pdfColNameAlign" onchange="updatePdfLayoutPreview()">
+                            <option value="left">왼쪽</option>
+                            <option value="center">가운데</option>
+                            <option value="right">오른쪽</option>
+                        </select>
+                        <input type="number" id="pdfColNameFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <input type="color" id="pdfColNameColor" value="#1a1a1a" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                        <span style="font-size:12px;">금액</span>
+                        <input type="number" id="pdfColAmountWidth" min="0.5" max="80" step="0.1" value="25" oninput="updatePdfLayoutPreview()">
+                        <select id="pdfColAmountAlign" onchange="updatePdfLayoutPreview()">
+                            <option value="left">왼쪽</option>
+                            <option value="center">가운데</option>
+                            <option value="right">오른쪽</option>
+                        </select>
+                        <input type="number" id="pdfColAmountFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <input type="color" id="pdfColAmountColor" value="#3b5bdb" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                        <span style="font-size:12px;">비고</span>
+                        <input type="number" id="pdfColNoteWidth" min="0.5" max="90" step="0.1" value="65" oninput="updatePdfLayoutPreview()">
+                        <select id="pdfColNoteAlign" onchange="updatePdfLayoutPreview()">
+                            <option value="left">왼쪽</option>
+                            <option value="center">가운데</option>
+                            <option value="right">오른쪽</option>
+                        </select>
+                        <input type="number" id="pdfColNoteFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <input type="color" id="pdfColNoteColor" value="#6b7280" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-hint">너비 합이 100%가 되도록 맞추면 표가 페이지 폭에 꽉 차게 나옵니다 (합이 달라도 동작하지만 비율이 어긋날 수 있어요). 여기서 정한 값은 선택한 PDF 디자인 테마 위에 덧씌워집니다.</div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="resetPdfLayoutToDefault()">기본값으로</button>
+                <button class="btn btn-ghost" onclick="closePdfLayoutModal()">취소</button>
+                <button class="btn btn-primary" onclick="savePdfLayoutSettings()">확인</button>
+            </div>
+        </div>
     </div>
 
 
@@ -1671,8 +1769,6 @@
             var savedPaletteText = storage.getItem('customPaletteRaw');
             document.getElementById('customPaletteInput').value = savedPaletteText !== null ? savedPaletteText : DEFAULT_PALETTE_TEXT;
             renderPaletteSwatches();
-            var savedTheme = storage.getItem('pdfTheme') || 'minimal';
-            setThemeSelection(savedTheme);
             var savedOrder = storage.getItem('rowOrder') || 'desc';
             setOrderSelection(savedOrder);
             setDefaultBillTypeSelection(storage.getItem('defaultBillType') || 'fifty');
@@ -1715,6 +1811,151 @@
 
         function closeExportModal() {
             document.getElementById('exportModal').classList.remove('active');
+        }
+
+        var PDF_LAYOUT_DEFAULTS = {
+            titleSize: 20,
+            titleColor: '#1a1a1a',
+            headerFontSize: 12,
+            headerColor: '#374151',
+            columns: {
+                num:    { width: 10, align: 'center', fontSize: 11, color: '#1a1a1a' },
+                name:   { width: 25, align: 'center', fontSize: 11, color: '#1a1a1a' },
+                amount: { width: 25, align: 'center', fontSize: 11, color: '#3b5bdb' },
+                note:   { width: 65, align: 'center', fontSize: 11, color: '#6b7280' }
+            }
+        };
+
+        function capitalizeKey(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function getPdfLayoutConfig() {
+            var defaults = JSON.parse(JSON.stringify(PDF_LAYOUT_DEFAULTS));
+            try {
+                var raw = storage.getItem('pdfLayoutConfig');
+                if (!raw) return defaults;
+                var parsed = JSON.parse(raw);
+                defaults.titleSize = parsed.titleSize || defaults.titleSize;
+                defaults.titleColor = parsed.titleColor || defaults.titleColor;
+                defaults.headerFontSize = parsed.headerFontSize || defaults.headerFontSize;
+                defaults.headerColor = parsed.headerColor || defaults.headerColor;
+                ['num', 'name', 'amount', 'note'].forEach(function(key) {
+                    if (parsed.columns && parsed.columns[key]) {
+                        defaults.columns[key] = Object.assign({}, defaults.columns[key], parsed.columns[key]);
+                    }
+                });
+                return defaults;
+            } catch (e) {
+                return defaults;
+            }
+        }
+
+        function populatePdfLayoutForm(cfg) {
+            document.getElementById('pdfTitleSizeInput').value = cfg.titleSize;
+            document.getElementById('pdfTitleColorInput').value = cfg.titleColor;
+            document.getElementById('pdfHeaderFontSizeInput').value = cfg.headerFontSize;
+            document.getElementById('pdfHeaderColorInput').value = cfg.headerColor;
+            setThemeSelection(storage.getItem('pdfTheme') || 'minimal');
+            ['num', 'name', 'amount', 'note'].forEach(function(key) {
+                var cap = capitalizeKey(key);
+                var col = cfg.columns[key];
+                document.getElementById('pdfCol' + cap + 'Width').value = col.width;
+                document.getElementById('pdfCol' + cap + 'Align').value = col.align;
+                document.getElementById('pdfCol' + cap + 'FontSize').value = col.fontSize;
+                document.getElementById('pdfCol' + cap + 'Color').value = col.color;
+            });
+        }
+
+        function readPdfLayoutForm() {
+            var cfg = {
+                titleSize: parseFloat(document.getElementById('pdfTitleSizeInput').value) || 16,
+                titleColor: document.getElementById('pdfTitleColorInput').value,
+                headerFontSize: parseFloat(document.getElementById('pdfHeaderFontSizeInput').value) || 11,
+                headerColor: document.getElementById('pdfHeaderColorInput').value,
+                columns: {}
+            };
+            ['num', 'name', 'amount', 'note'].forEach(function(key) {
+                var cap = capitalizeKey(key);
+                cfg.columns[key] = {
+                    width: parseFloat(document.getElementById('pdfCol' + cap + 'Width').value) || 1,
+                    align: document.getElementById('pdfCol' + cap + 'Align').value,
+                    fontSize: parseFloat(document.getElementById('pdfCol' + cap + 'FontSize').value) || 9,
+                    color: document.getElementById('pdfCol' + cap + 'Color').value
+                };
+            });
+            return cfg;
+        }
+
+        function updatePdfLayoutPreview() {
+            var cfg = readPdfLayoutForm();
+            var preview = document.getElementById('pdfLayoutPreview');
+            if (!preview) return;
+            var sampleRows = [
+                { num: 1, name: '김민준', amount: '10 만원', note: '신랑친구' },
+                { num: 2, name: '이서윤', amount: '5 만원', note: '회사동료' },
+                { num: 3, name: '박지호', amount: '10 만원', note: '' }
+            ];
+            var c = cfg.columns;
+            var html = `<div style="font-family:'Noto Sans KR',sans-serif;font-size:${cfg.titleSize}px;font-weight:700;color:${cfg.titleColor};text-align:center;margin-bottom:10px;">축의금 명부</div>`;
+            html += `<table style="width:100%;border-collapse:collapse;table-layout:fixed;font-family:'Noto Sans KR',sans-serif;">`;
+            html += `<colgroup><col style="width:${c.num.width}%"><col style="width:${c.name.width}%"><col style="width:${c.amount.width}%"><col style="width:${c.note.width}%"></colgroup>`;
+            html += `<thead><tr style="border-bottom:2px solid #333;">`;
+            html += `<th style="padding:5px;font-size:${cfg.headerFontSize}px;color:${cfg.headerColor};">#</th>`;
+            html += `<th style="padding:5px;font-size:${cfg.headerFontSize}px;color:${cfg.headerColor};">이름</th>`;
+            html += `<th style="padding:5px;font-size:${cfg.headerFontSize}px;color:${cfg.headerColor};">금액</th>`;
+            html += `<th style="padding:5px;font-size:${cfg.headerFontSize}px;color:${cfg.headerColor};">비고</th>`;
+            html += `</tr></thead><tbody>`;
+            sampleRows.forEach(function(row) {
+                html += `<tr style="border-bottom:1px solid #eee;">`;
+                html += `<td style="text-align:${c.num.align};font-size:${c.num.fontSize}px;color:${c.num.color};padding:5px;">${row.num}</td>`;
+                html += `<td style="text-align:${c.name.align};font-size:${c.name.fontSize}px;color:${c.name.color};padding:5px;">${row.name}</td>`;
+                html += `<td style="text-align:${c.amount.align};font-size:${c.amount.fontSize}px;color:${c.amount.color};padding:5px;">${row.amount}</td>`;
+                html += `<td style="text-align:${c.note.align};font-size:${c.note.fontSize}px;color:${c.note.color};padding:5px;">${row.note}</td>`;
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            preview.innerHTML = html;
+        }
+
+        function openPdfLayoutModal() {
+            var cfg = getPdfLayoutConfig();
+            populatePdfLayoutForm(cfg);
+            document.getElementById('pdfLayoutModal').classList.add('active');
+            updatePdfLayoutPreview();
+        }
+
+        function closePdfLayoutModal() {
+            document.getElementById('pdfLayoutModal').classList.remove('active');
+        }
+
+        function savePdfLayoutSettings() {
+            var cfg = readPdfLayoutForm();
+            storage.setItem('pdfLayoutConfig', JSON.stringify(cfg));
+            storage.setItem('pdfTheme', getSelectedTheme());
+            closePdfLayoutModal();
+        }
+
+        function resetPdfLayoutToDefault() {
+            storage.removeItem('pdfLayoutConfig');
+            populatePdfLayoutForm(JSON.parse(JSON.stringify(PDF_LAYOUT_DEFAULTS)));
+            updatePdfLayoutPreview();
+        }
+
+        function makePdfColgroupHTML(cfg) {
+            var c = cfg.columns;
+            return `<colgroup><col style="width:${c.num.width}%"><col style="width:${c.name.width}%"><col style="width:${c.amount.width}%"><col style="width:${c.note.width}%"></colgroup>`;
+        }
+
+        function makePdfLayoutOverrideCSS(cfg) {
+            var c = cfg.columns;
+            return `
+    .title { font-size: ${cfg.titleSize}px; color: ${cfg.titleColor}; }
+    thead th { font-size: ${cfg.headerFontSize}px; color: ${cfg.headerColor}; }
+    td.num { text-align: ${c.num.align}; font-size: ${c.num.fontSize}px; color: ${c.num.color}; }
+    td.name { text-align: ${c.name.align}; font-size: ${c.name.fontSize}px; color: ${c.name.color}; }
+    td.amount { text-align: ${c.amount.align}; font-size: ${c.amount.fontSize}px; color: ${c.amount.color}; }
+    td.note { text-align: ${c.note.align}; font-size: ${c.note.fontSize}px; color: ${c.note.color}; }`;
         }
 
         document.addEventListener('click', function(event) {
@@ -1852,7 +2093,6 @@
             var fontSize = parseFloat(document.getElementById('fontSizeInput').value);
             if (isNaN(fontSize) || fontSize < 6) fontSize = 9;
             storage.setItem('pdfFontSize', fontSize);
-            storage.setItem('pdfTheme', getSelectedTheme());
             storage.setItem('showEntryCount', document.getElementById('showEntryCountInput').checked);
             storage.setItem('autoSubmitOnSuggestionEnter', document.getElementById('autoSubmitOnSuggestionEnterInput').checked);
             storage.setItem('enableNewRowHighlight', document.getElementById('enableNewRowHighlightInput').checked);
@@ -1914,6 +2154,7 @@
             var dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
             var FONT_SIZE = parseFloat(storage.getItem('pdfFontSize')) || 9;
             var THEME = storage.getItem('pdfTheme') || 'minimal';
+            var LAYOUT_CFG = getPdfLayoutConfig();
 
             // 행 데이터 추출
             var rowData = rows.map(function(row) {
@@ -1954,10 +2195,10 @@
     table { width: 100%; border-collapse: collapse; font-size: ${fs}px; table-layout: fixed; }
     thead th { padding: ${Math.round(fs*0.5)}px 5px; font-weight: 600; text-align: center; }
     tbody td { padding: ${Math.round(fs*0.4)}px 5px; }
-    td.num { text-align: center; width: 4%; }
-    td.name { font-weight: 500; width: 25%; }
+    td.num { text-align: center; width: 1.6%; }
+    td.name { font-weight: 500; width: 12.5%; text-align: center; }
     td.amount { text-align: center; font-weight: 600; width: 17%; }
-    td.note { width: 50%; }
+    td.note { width: 68.9%; text-align: center; }
     .page-footer { margin-top: 6px; display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; }
     .page-date { font-size: 10px; }
     .page-footer-right { display: flex; align-items: baseline; gap: 12px; }
@@ -2041,11 +2282,11 @@
             var mdoc = measureIframe.contentWindow.document;
             mdoc.open();
             mdoc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>${makeCSS(FONT_SIZE, THEME)}</style></head>
+<style>${makeCSS(FONT_SIZE, THEME)}${makePdfLayoutOverrideCSS(LAYOUT_CFG)}</style></head>
 <body class="theme-${THEME}"><div class="page" id="testPage">
 <div class="title">축의금 명부</div>
 <div class="title-deco">・ ・ ・</div>
-<table><thead><tr><th>#</th><th>이름</th><th>금액</th><th>비고</th></tr></thead>
+<table>${makePdfColgroupHTML(LAYOUT_CFG)}<thead><tr><th>#</th><th>이름</th><th>금액</th><th>비고</th></tr></thead>
 <tbody id="testBody"></tbody></table>
 <div class="page-footer"><div class="page-date">출력일 : ${dateStr}</div><div class="page-footer-right"><div class="page-subtotal">이 페이지 합계 : <b>0만원</b></div><div class="page-number">1/1</div></div></div>
 </div></body></html>`);
@@ -2086,7 +2327,7 @@
                 return `<div class="page">
     <div class="title">축의금 명부</div>
     <div class="title-deco">・ ・ ・</div>
-    <table><thead><tr><th>#</th><th style="text-align:left">이름</th><th>금액</th><th style="text-align:left">비고</th></tr></thead>
+    <table>${makePdfColgroupHTML(LAYOUT_CFG)}<thead><tr><th>#</th><th>이름</th><th>금액</th><th>비고</th></tr></thead>
     <tbody>${bodyRows}</tbody></table>
     <div class="page-footer">
         <div class="page-date">출력일 : ${dateStr}</div>
@@ -2121,7 +2362,7 @@
             var html = `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8"><title>축의금 명부</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>${makeCSS(FONT_SIZE, THEME)}</style>
+<style>${makeCSS(FONT_SIZE, THEME)}${makePdfLayoutOverrideCSS(LAYOUT_CFG)}</style>
 </head><body class="theme-${THEME}">${pagesHtml}${summaryPage}
 <` + `script>window.onload=function(){window.focus();window.print()};</` + `script>
 </body></html>`;
