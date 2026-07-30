@@ -276,7 +276,7 @@
             margin-top: calc(var(--header-h) + var(--panel-h));
             padding: 20px 24px 40px;
         }
-        table {
+        #tableContainer table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
@@ -286,10 +286,10 @@
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
         }
-        thead tr {
+        #tableContainer thead tr {
             background: var(--bg);
         }
-        th {
+        #tableContainer th {
             padding: 11px 14px;
             text-align: center;
             font-size: 11px;
@@ -299,7 +299,7 @@
             text-transform: uppercase;
             border-bottom: 1px solid var(--border);
         }
-        td {
+        #tableContainer td {
             padding: 10px 14px;
             text-align: center;
             border-bottom: 1px solid var(--border-light);
@@ -307,19 +307,19 @@
             font-size: 13px;
             transition: font-size .25s ease, font-weight .25s ease, color .25s ease;
         }
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover td { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-        tbody tr:hover { transition: background .1s; }
+        #tableContainer tbody tr:last-child td { border-bottom: none; }
+        #tableContainer tbody tr:hover td { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+        #tableContainer tbody tr:hover { transition: background .1s; }
         #guestList tr.row-newest td {
             font-size: var(--new-row-highlight-size, 16px);
             font-weight: 600;
             color: var(--accent);
         }
 
-        td:nth-child(1) { color: var(--text-muted); font-size: 12px; width: 52px; }
-        td:nth-child(2) { font-weight: 500; text-align: left; }
-        td:nth-child(3) { font-weight: 600; color: var(--accent); }
-        td:nth-child(4) {
+        #tableContainer td:nth-child(1) { color: var(--text-muted); font-size: 12px; width: 52px; }
+        #tableContainer td:nth-child(2) { font-weight: 500; text-align: left; }
+        #tableContainer td:nth-child(3) { font-weight: 600; color: var(--accent); }
+        #tableContainer td:nth-child(4) {
             text-align: left;
             color: var(--text-secondary);
             white-space: nowrap;
@@ -328,13 +328,13 @@
             max-width: 160px;
             cursor: pointer;
         }
-        td:nth-child(4):hover { color: var(--text-primary); }
-        td:nth-child(5) { width: 44px; }
-        td:nth-child(6) { width: 66px; }
+        #tableContainer td:nth-child(4):hover { color: var(--text-primary); }
+        #tableContainer td:nth-child(5) { width: 44px; }
+        #tableContainer td:nth-child(6) { width: 66px; }
 
         /* checkbox styling */
-        td:nth-child(5) input[type="checkbox"],
-        td:nth-child(6) input[type="checkbox"] {
+        #tableContainer td:nth-child(5) input[type="checkbox"],
+        #tableContainer td:nth-child(6) input[type="checkbox"] {
             width: 16px; height: 16px;
             cursor: pointer;
             accent-color: var(--accent);
@@ -376,25 +376,25 @@
         /* ── PRINT ── */
         @media print {
             .header, .panel,
-            th:nth-child(5), td:nth-child(5),
-            th:nth-child(6), td:nth-child(6),
-            th:nth-child(7), td:nth-child(7),
-            th:nth-child(8), td:nth-child(8) { display: none !important; }
+            #tableContainer th:nth-child(5), #tableContainer td:nth-child(5),
+            #tableContainer th:nth-child(6), #tableContainer td:nth-child(6),
+            #tableContainer th:nth-child(7), #tableContainer td:nth-child(7),
+            #tableContainer th:nth-child(8), #tableContainer td:nth-child(8) { display: none !important; }
             @page { size: A4 portrait; margin: 25mm 20mm; }
             body { background: #fff; }
             .table-wrapper { margin-top: 0; padding: 0; }
-            table {
+            #tableContainer table {
                 border-radius: 0;
                 box-shadow: none;
                 border: 1px solid #ccc;
                 font-size: 10px;
             }
-            th, td { padding: 6px 8px; }
-            tbody tr:hover td { background: none; }
-            th:nth-child(1) { width: 10%; }
-            th:nth-child(2) { width: 30%; }
-            th:nth-child(3) { width: 20%; }
-            th:nth-child(4) { width: 40%; }
+            #tableContainer th, #tableContainer td { padding: 6px 8px; }
+            #tableContainer tbody tr:hover td { background: none; }
+            #tableContainer th:nth-child(1) { width: 10%; }
+            #tableContainer th:nth-child(2) { width: 30%; }
+            #tableContainer th:nth-child(3) { width: 20%; }
+            #tableContainer th:nth-child(4) { width: 40%; }
         }
         /* ── SETTINGS MODAL ── */
         .modal-overlay {
@@ -488,6 +488,13 @@
         .theme-option.selected {
             border-color: var(--accent);
             background: var(--accent-light);
+        }
+        /* PDF 테마 선택 카드는 앱 색상 커스터마이징과 무관하게, 실제 선택된 PDF 테마 색을 따른다 */
+        #themeOptions .theme-option:hover { background: #f7f8fa; }
+        #themeOptions .theme-option input { accent-color: var(--slider-accent, #3b5bdb); }
+        #themeOptions .theme-option.selected {
+            border-color: var(--slider-accent, #3b5bdb);
+            background: color-mix(in srgb, var(--slider-accent, #3b5bdb) 10%, #ffffff);
         }
         .theme-swatch {
             width: 20px; height: 20px;
@@ -798,7 +805,7 @@
             <div class="modal-title">🖨 PDF 화면설정</div>
             <div class="modal-field">
                 <label>미리보기</label>
-                <div id="pdfLayoutPreview" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;background:#ffffff;overflow-x:auto;"></div>
+                <div id="pdfLayoutPreview" style="border:1px solid #e2e2e2;border-radius:var(--radius-sm);padding:16px;background:#ffffff;overflow-x:auto;"></div>
             </div>
             <div class="modal-field">
                 <div style="display:flex;gap:16px;">
