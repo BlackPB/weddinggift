@@ -532,6 +532,92 @@
             background: var(--surface);
             color: var(--text-primary);
         }
+
+        /* ── 크기/너비 슬라이더 ── */
+        .modal-field input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            border: none;
+            padding: 0;
+            height: 20px;
+            background: transparent;
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+        .modal-field input[type="range"]::-webkit-slider-runnable-track {
+            height: 5px;
+            border-radius: 999px;
+            background: var(--border);
+        }
+        .modal-field input[type="range"]::-moz-range-track {
+            height: 5px;
+            border-radius: 999px;
+            background: var(--border);
+        }
+        .modal-field input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            margin-top: -6px;
+            background: var(--slider-accent, var(--accent));
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(30,41,59,0.3);
+            cursor: pointer;
+            transition: transform .1s ease, background-color .2s ease;
+        }
+        .modal-field input[type="range"]::-moz-range-thumb {
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: var(--slider-accent, var(--accent));
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(30,41,59,0.3);
+            cursor: pointer;
+            transition: transform .1s ease, background-color .2s ease;
+        }
+        .modal-field input[type="range"]:hover::-webkit-slider-thumb,
+        .modal-field input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.18);
+        }
+        .modal-field input[type="range"]:hover::-moz-range-thumb,
+        .modal-field input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.18);
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mini-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .modal-field input.slider-num {
+            width: 56px;
+            flex-shrink: 0;
+            padding: 5px 6px;
+            font-size: 12px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .modal-field input.slider-num-mini {
+            width: 44px;
+            flex-shrink: 0;
+            padding: 3px 4px;
+            font-size: 11px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .slider-unit {
+            font-size: 11px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            width: 14px;
+        }
         .modal-hint {
             font-size: 11px;
             color: var(--text-muted);
@@ -555,7 +641,11 @@
                 <div class="settings-cell">
                     <div class="modal-field">
                         <label for="fontSizeInput">표 글꼴 크기 (px)</label>
-                        <input type="number" id="fontSizeInput" min="6" max="14" step="0.5" value="9">
+                        <div class="slider-row">
+                            <input type="range" id="fontSizeInput" min="4" max="24" step="0.5" value="9" oninput="syncSliderValueLabels()">
+                            <input type="number" class="slider-num" id="fontSizeInputNum" min="4" max="24" step="0.5" value="9">
+                            <span class="slider-unit">px</span>
+                        </div>
                     </div>
                     <div class="modal-hint">PDF 표의 글꼴 크기입니다. 크기에 따라 한 페이지 행 수가 자동으로 결정됩니다. (기본값: 9px)</div>
                 </div>
@@ -636,13 +726,20 @@
                 <div class="settings-cell">
                     <div class="modal-field">
                         <label for="newRowHighlightSizeInput">강조 효과 크기 (px)</label>
-                        <input type="number" id="newRowHighlightSizeInput" min="13" max="30" step="1" value="22">
+                        <div class="slider-row">
+                            <input type="range" id="newRowHighlightSizeInput" min="4" max="46" step="1" value="22" oninput="syncSliderValueLabels()">
+                            <input type="number" class="slider-num" id="newRowHighlightSizeInputNum" min="4" max="46" step="1" value="22">
+                            <span class="slider-unit">px</span>
+                        </div>
                     </div>
                 </div>
                 <div class="settings-cell">
                     <div class="modal-field">
-                        <label for="billIconSizeInput">지폐 이미지 크기 (1~10단계, 현재값: 4)</label>
-                        <input type="number" id="billIconSizeInput" min="1" max="10" step="1" value="4">
+                        <label for="billIconSizeInput">지폐 이미지 크기 (1~10단계)</label>
+                        <div class="slider-row">
+                            <input type="range" id="billIconSizeInput" min="1" max="22" step="1" value="4" oninput="syncSliderValueLabels()">
+                            <input type="number" class="slider-num" id="billIconSizeInputNum" min="1" max="22" step="1" value="4">
+                        </div>
                     </div>
                     <div class="modal-hint">숫자가 클수록 표의 지폐/수표 이미지가 크게 표시됩니다.</div>
                 </div>
@@ -651,7 +748,11 @@
                         <div style="display:flex;gap:16px;">
                             <div style="flex:1;">
                                 <label for="entryCountFontSizeInput">입력 번호 폰트 크기 (px)</label>
-                                <input type="number" id="entryCountFontSizeInput" min="12" max="60" step="1" value="50">
+                                <div class="slider-row">
+                                    <input type="range" id="entryCountFontSizeInput" min="10" max="125" step="1" value="50" oninput="syncSliderValueLabels()">
+                                    <input type="number" class="slider-num" id="entryCountFontSizeInputNum" min="10" max="125" step="1" value="50">
+                                    <span class="slider-unit">px</span>
+                                </div>
                             </div>
                             <div style="flex:1;">
                                 <label for="entryCountColorInput">입력 번호 색상</label>
@@ -703,7 +804,11 @@
                 <div style="display:flex;gap:16px;">
                     <div style="flex:1;">
                         <label for="pdfTitleSizeInput">제목 크기 (px)</label>
-                        <input type="number" id="pdfTitleSizeInput" min="10" max="40" step="1" value="20" oninput="updatePdfLayoutPreview()">
+                        <div class="slider-row">
+                            <input type="range" id="pdfTitleSizeInput" min="4" max="50" step="1" value="20" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num" id="pdfTitleSizeInputNum" min="4" max="50" step="1" value="20">
+                            <span class="slider-unit">px</span>
+                        </div>
                     </div>
                     <div style="flex:1;">
                         <label for="pdfTitleColorInput">제목 색상</label>
@@ -711,7 +816,11 @@
                     </div>
                     <div style="flex:1;">
                         <label for="pdfHeaderFontSizeInput">헤더 폰트 크기 (px)</label>
-                        <input type="number" id="pdfHeaderFontSizeInput" min="6" max="24" step="0.5" value="12" oninput="updatePdfLayoutPreview()">
+                        <div class="slider-row">
+                            <input type="range" id="pdfHeaderFontSizeInput" min="4" max="30" step="0.5" value="12" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num" id="pdfHeaderFontSizeInputNum" min="4" max="30" step="0.5" value="12">
+                            <span class="slider-unit">px</span>
+                        </div>
                     </div>
                     <div style="flex:1;">
                         <label for="pdfHeaderColorInput">헤더 색상</label>
@@ -748,51 +857,75 @@
             <div class="modal-field">
                 <label>항목별 너비 · 정렬 · 폰트크기 · 색상</label>
                 <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
-                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;font-size:11px;color:var(--text-secondary);font-weight:600;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 150px 130px 56px;gap:6px;font-size:11px;color:var(--text-secondary);font-weight:600;">
                         <span></span><span>너비(%)</span><span>정렬</span><span>폰트(px)</span><span>색상</span>
                     </div>
-                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 150px 130px 56px;gap:6px;align-items:center;">
                         <span style="font-size:12px;">순서</span>
-                        <input type="number" id="pdfColNumWidth" min="0.5" max="50" step="0.1" value="10" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNumWidth" min="0.5" max="40" step="0.1" value="10" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNumWidthNum" min="0.5" max="40" step="0.1" value="10">
+                        </div>
                         <select id="pdfColNumAlign" onchange="updatePdfLayoutPreview()">
                             <option value="left">왼쪽</option>
                             <option value="center">가운데</option>
                             <option value="right">오른쪽</option>
                         </select>
-                        <input type="number" id="pdfColNumFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNumFontSize" min="4" max="26" step="0.5" value="11" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNumFontSizeNum" min="4" max="26" step="0.5" value="11">
+                        </div>
                         <input type="color" id="pdfColNumColor" value="#1a1a1a" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
                     </div>
-                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 150px 130px 56px;gap:6px;align-items:center;">
                         <span style="font-size:12px;">이름</span>
-                        <input type="number" id="pdfColNameWidth" min="0.5" max="80" step="0.1" value="25" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNameWidth" min="0.5" max="100" step="0.1" value="25" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNameWidthNum" min="0.5" max="100" step="0.1" value="25">
+                        </div>
                         <select id="pdfColNameAlign" onchange="updatePdfLayoutPreview()">
                             <option value="left">왼쪽</option>
                             <option value="center">가운데</option>
                             <option value="right">오른쪽</option>
                         </select>
-                        <input type="number" id="pdfColNameFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNameFontSize" min="4" max="26" step="0.5" value="11" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNameFontSizeNum" min="4" max="26" step="0.5" value="11">
+                        </div>
                         <input type="color" id="pdfColNameColor" value="#1a1a1a" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
                     </div>
-                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 150px 130px 56px;gap:6px;align-items:center;">
                         <span style="font-size:12px;">금액</span>
-                        <input type="number" id="pdfColAmountWidth" min="0.5" max="80" step="0.1" value="25" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColAmountWidth" min="0.5" max="100" step="0.1" value="25" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColAmountWidthNum" min="0.5" max="100" step="0.1" value="25">
+                        </div>
                         <select id="pdfColAmountAlign" onchange="updatePdfLayoutPreview()">
                             <option value="left">왼쪽</option>
                             <option value="center">가운데</option>
                             <option value="right">오른쪽</option>
                         </select>
-                        <input type="number" id="pdfColAmountFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColAmountFontSize" min="4" max="26" step="0.5" value="11" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColAmountFontSizeNum" min="4" max="26" step="0.5" value="11">
+                        </div>
                         <input type="color" id="pdfColAmountColor" value="#3b5bdb" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
                     </div>
-                    <div style="display:grid;grid-template-columns: 48px 1fr 76px 76px 56px;gap:6px;align-items:center;">
+                    <div style="display:grid;grid-template-columns: 48px 1fr 150px 130px 56px;gap:6px;align-items:center;">
                         <span style="font-size:12px;">비고</span>
-                        <input type="number" id="pdfColNoteWidth" min="0.5" max="90" step="0.1" value="65" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNoteWidth" min="0.5" max="100" step="0.1" value="65" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNoteWidthNum" min="0.5" max="100" step="0.1" value="65">
+                        </div>
                         <select id="pdfColNoteAlign" onchange="updatePdfLayoutPreview()">
                             <option value="left">왼쪽</option>
                             <option value="center">가운데</option>
                             <option value="right">오른쪽</option>
                         </select>
-                        <input type="number" id="pdfColNoteFontSize" min="6" max="20" step="0.5" value="11" oninput="updatePdfLayoutPreview()">
+                        <div class="mini-slider-row">
+                            <input type="range" id="pdfColNoteFontSize" min="4" max="26" step="0.5" value="11" oninput="updatePdfLayoutPreview(); syncSliderValueLabels()">
+                            <input type="number" class="slider-num-mini" id="pdfColNoteFontSizeNum" min="4" max="26" step="0.5" value="11">
+                        </div>
                         <input type="color" id="pdfColNoteColor" value="#6b7280" style="width:100%;height:28px;padding:2px;cursor:pointer;" oninput="updatePdfLayoutPreview()">
                     </div>
                 </div>
@@ -822,7 +955,7 @@
         <!-- Row 1: Input + Actions -->
         <div class="panel-row">
             <div class="field field-name">
-                <input type="text" id="name" placeholder="이름">
+                <input type="text" id="name" placeholder="이름" maxlength="40">
             </div>
             <div class="field field-amount">
                 <input type="text" id="amount" placeholder="금액 (만원)" oninput="validateAmount(this)">
@@ -847,6 +980,10 @@
         </div>
         <!-- Row 2: Range + Stats + Undo/Redo -->
         <div class="panel-row">
+            <div class="field" style="width:150px;">
+                <input type="text" id="searchInput" placeholder="🔍 이름/비고 검색" oninput="filterGuestList()">
+            </div>
+            <div class="sep"></div>
             <div class="field field-range">
                 <input type="text" id="startRow" placeholder="시작" oninput="calculateTotal()">
             </div>
@@ -1199,7 +1336,9 @@
         });
 
         window.addEventListener('load', function() {
+            restoreGuestDataFromStorage();
             restoreCheckboxStates();
+            filterGuestList();
             updateEntryCountVisibility();
             updateEntryCountFontSize();
             updateEntryCountDisplay();
@@ -1232,6 +1371,76 @@
                 }
             });
             syncHeaderCheckbox();
+        }
+
+        // ── 명부 데이터 자동 로컬 저장 (브라우저 새로고침/강제종료 대비) ──
+        // 기존에는 체크박스 상태만 localStorage에 남고 실제 이름/금액/비고는
+        // 메모리에만 있어 탭이 닫히면 전부 사라졌음. 입력이 바뀔 때마다 여기에 스냅샷을
+        // 남기고, 페이지를 열 때 복구한다. (엑셀로 내보내는 "저장"과는 별개의 안전장치)
+        function getCurrentRowsData() {
+            const table = document.getElementById('guestList');
+            return Array.from(table.rows).map(row => ({
+                seq: row.cells[0].textContent,
+                name: row.cells[1].textContent,
+                amount: row.cells[2].textContent.replace(/[^\d]/g, ''),
+                note: row.cells[3].textContent,
+                checked: row.cells[4].querySelector('input[type="checkbox"]').checked,
+                billType: row.cells[5].dataset.billtype || 'fifty'
+            }));
+        }
+
+        function persistGuestData() {
+            try {
+                storage.setItem('guestData', JSON.stringify(getCurrentRowsData()));
+                storage.setItem('guestDataMeta', JSON.stringify({ currentFileName: currentFileName }));
+            } catch (e) {
+                // localStorage 용량 초과 등은 무시 (엑셀 저장은 여전히 가능)
+            }
+        }
+
+        function clearPersistedGuestData() {
+            storage.removeItem('guestData');
+            storage.removeItem('guestDataMeta');
+        }
+
+        function restoreGuestDataFromStorage() {
+            var raw = storage.getItem('guestData');
+            if (!raw) return;
+            var rows;
+            try {
+                rows = JSON.parse(raw);
+            } catch (e) {
+                return;
+            }
+            if (!Array.isArray(rows) || rows.length === 0) return;
+
+            var table = document.getElementById('guestList');
+            table.innerHTML = '';
+            rowIndex = 1;
+            cumulativeTotal = 0;
+            amountFrequency = {};
+            var maxSeq = 0;
+            rows.forEach(function(row) {
+                var seqNum = parseInt(row.seq);
+                if (!isNaN(seqNum)) maxSeq = Math.max(maxSeq, seqNum);
+                addRowWithoutHistory(row.name, parseInt(row.amount), row.note, row.checked, false, row.seq, row.billType);
+            });
+            rowIndex = maxSeq + 1;
+
+            try {
+                var meta = JSON.parse(storage.getItem('guestDataMeta') || '{}');
+                if (meta.currentFileName) currentFileName = meta.currentFileName;
+            } catch (e) { /* 무시 */ }
+
+            applyRowOrderToDOM();
+            resetAmountFrequency();
+            updateBillTypeSummary();
+            updateNoteSuggestions();
+            updateCumulativeTotal();
+
+            history = [getCurrentRowsData()];
+            historyIndex = 0;
+            isDataModified = false;
         }
 
         function saveHistory() {
@@ -1271,6 +1480,8 @@
             updateNoteSuggestions();
             updateCumulativeTotal();
             isDataModified = true;
+            persistGuestData();
+            filterGuestList();
         }
 
         function validateAmount(input) {
@@ -1311,7 +1522,7 @@
         }
 
         function addEntry() {
-            var name = document.getElementById('name').value;
+            var name = document.getElementById('name').value.trim();
             var amount = document.getElementById('amount').value;
             var note = document.getElementById('note').value;
             var billTypeEl = document.querySelector('input[name="billTypeInput"]:checked');
@@ -1319,6 +1530,11 @@
 
             if (name === "" || amount === "") {
                 alert("이름과 금액은 필수 항목입니다.");
+                return;
+            }
+            var amtNum = parseInt(amount);
+            if (isNaN(amtNum) || amtNum <= 0) {
+                alert("금액은 0보다 큰 숫자로 입력해주세요.");
                 return;
             }
 
@@ -1352,6 +1568,7 @@
             }
             isDataModified = true;
             adjustTableMargin();
+            persistGuestData();
         }
 
         function addRowWithoutHistory(name, amount, note, checked = false, updateFrequency = true, seq, billType = 'fifty') {
@@ -1615,9 +1832,9 @@
             var row = button.parentNode.parentNode;
             var cells = row.getElementsByTagName("td");
             row.dataset.originalAmount = cells[2].textContent.replace(/[^\d]/g, '');
-            cells[1].innerHTML = `<input type="text" class="edit-input" value="${cells[1].textContent}">`;
-            cells[2].innerHTML = `<input type="text" class="edit-input" value="${cells[2].textContent.replace(/[^0-9]/g, '')}">`;
-            cells[3].innerHTML = `<input type="text" class="edit-input" value="${cells[3].textContent}" maxlength="20">`;
+            cells[1].innerHTML = `<input type="text" class="edit-input" value="${escapeAttr(cells[1].textContent)}" maxlength="40">`;
+            cells[2].innerHTML = `<input type="text" class="edit-input" value="${escapeAttr(cells[2].textContent.replace(/[^0-9]/g, ''))}" oninput="validateAmount(this)">`;
+            cells[3].innerHTML = `<input type="text" class="edit-input" value="${escapeAttr(cells[3].textContent)}" maxlength="20">`;
             cells[5].innerHTML = billTypeRadioHTML(cells[5].dataset.billtype || 'fifty');
             button.textContent = "완료";
             button.setAttribute("onclick", "completeEdit(this)");
@@ -1625,7 +1842,7 @@
 
         function editCell(cell) {
             var cellContent = cell.textContent;
-            cell.innerHTML = `<input type="text" class="edit-input" value="${cellContent}" maxlength="20">`;
+            cell.innerHTML = `<input type="text" class="edit-input" value="${escapeAttr(cellContent)}" maxlength="20">`;
             var input = cell.querySelector('input');
             input.focus();
             input.select();
@@ -1646,9 +1863,18 @@
                 : parseInt(cells[2].textContent.replace(/[^\d]/g, ''));
             delete row.dataset.originalAmount;
 
-            var newName = nameInput ? nameInput.value : cells[1].textContent;
+            var newName = nameInput ? nameInput.value.trim() : cells[1].textContent;
             var newAmount = amountInput ? parseInt(amountInput.value) : parseInt(cells[2].textContent.replace(/[^\d]/g, ''));
             var newNote = noteInput ? noteInput.value : cells[3].textContent;
+
+            if (nameInput && newName === "") {
+                alert("이름은 비워둘 수 없습니다.");
+                return;
+            }
+            if (amountInput && (isNaN(newAmount) || newAmount <= 0)) {
+                alert("금액은 0보다 큰 숫자로 입력해주세요.");
+                return;
+            }
 
             cells[1].textContent = newName;
             cells[2].textContent = (isNaN(newAmount) || newAmount === "") ? "" : formatAmount(newAmount);
@@ -1675,6 +1901,7 @@
             updateBillTypeSummary();
             updateNoteSuggestions();
             isDataModified = true;
+            persistGuestData();
         }
 
         function deleteRow(button) {
@@ -1702,6 +1929,7 @@
             updateNoteSuggestions();
             isDataModified = true;
             saveCheckboxStates();
+            persistGuestData();
         }
 
         function resetData() {
@@ -1721,6 +1949,7 @@
             displayAmountFrequency();
             updateBillTypeSummary();
             updateNoteSuggestions();
+            clearPersistedGuestData();
         }
 
         function billTypeToLabel(bt) {
@@ -1782,6 +2011,7 @@
             document.getElementById('entryCountFontSizeInput').value = parseFloat(storage.getItem('entryCountFontSize')) || 50;
             document.getElementById('entryCountColorInput').value = storage.getItem('entryCountColor') || '#3b5bdb';
             setColorSelection(storage.getItem('entryCountColor') || '#3b5bdb');
+            syncSliderValueLabels();
             document.getElementById('settingsModal').classList.add('active');
         }
 
@@ -1865,6 +2095,7 @@
                 document.getElementById('pdfCol' + cap + 'FontSize').value = col.fontSize;
                 document.getElementById('pdfCol' + cap + 'Color').value = col.color;
             });
+            syncSliderValueLabels();
         }
 
         function readPdfLayoutForm() {
@@ -1978,6 +2209,18 @@
             }
         }
 
+        var PDF_THEME_ACCENT = {
+            minimal: '#3b5bdb',
+            charcoal: '#2b2d31',
+            coral: '#e8590c',
+            teal: '#0f9d76'
+        };
+
+        function applyPdfThemeSliderColor(theme) {
+            var modal = document.getElementById('pdfLayoutModal');
+            if (modal) modal.style.setProperty('--slider-accent', PDF_THEME_ACCENT[theme] || PDF_THEME_ACCENT.minimal);
+        }
+
         function setThemeSelection(theme) {
             var options = document.querySelectorAll('[data-theme]');
             options.forEach(function(opt) {
@@ -1985,6 +2228,7 @@
                 opt.classList.toggle('selected', isMatch);
                 opt.querySelector('input').checked = isMatch;
             });
+            applyPdfThemeSliderColor(theme);
         }
 
         function getSelectedTheme() {
@@ -2091,7 +2335,7 @@
 
         function saveSettings() {
             var fontSize = parseFloat(document.getElementById('fontSizeInput').value);
-            if (isNaN(fontSize) || fontSize < 6) fontSize = 9;
+            if (isNaN(fontSize) || fontSize < 4) fontSize = 9;
             storage.setItem('pdfFontSize', fontSize);
             storage.setItem('showEntryCount', document.getElementById('showEntryCountInput').checked);
             storage.setItem('autoSubmitOnSuggestionEnter', document.getElementById('autoSubmitOnSuggestionEnterInput').checked);
@@ -2107,7 +2351,7 @@
 
             var billIconSizeVal = parseFloat(document.getElementById('billIconSizeInput').value);
             if (isNaN(billIconSizeVal) || billIconSizeVal < 1) billIconSizeVal = 4;
-            if (billIconSizeVal > 10) billIconSizeVal = 10;
+            if (billIconSizeVal > 22) billIconSizeVal = 22;
             storage.setItem('billIconSize', billIconSizeVal);
 
             updateHighlightAndIconSizes();
@@ -2398,6 +2642,18 @@
             return div.innerHTML;
         }
 
+        // escapeHtml은 텍스트 노드 기준이라 큰따옴표(")는 이스케이프하지 않음.
+        // value="..." 같은 HTML 속성에 값을 넣을 땐 반드시 이 함수를 사용해야
+        // 이름/비고에 큰따옴표가 포함돼도 속성이 깨지거나 스크립트가 주입되지 않음.
+        function escapeAttr(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function getCurrentDateTime() {
             const now = new Date();
             return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
@@ -2436,6 +2692,8 @@
                 isDataModified = false;
                 saveCheckboxStates();
                 adjustTableMargin();
+                persistGuestData();
+                filterGuestList();
             };
             reader.readAsArrayBuffer(file);
         }
@@ -2493,7 +2751,7 @@
 
             var level = parseFloat(storage.getItem('billIconSize')) || 4;
             if (level < 1) level = 1;
-            if (level > 10) level = 10;
+            if (level > 22) level = 22;
             var baseHeight = 8 + level * 1.8;
             var highlightedHeight = baseHeight + 8;
             document.documentElement.style.setProperty('--bill-icon-height', baseHeight + 'px');
@@ -2538,6 +2796,18 @@
 
         document.getElementById('startRow').addEventListener('input', calculateTotal);
         document.getElementById('endRow').addEventListener('input', calculateTotal);
+
+        function filterGuestList() {
+            var searchInput = document.getElementById('searchInput');
+            var query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            var rows = document.getElementById('guestList').getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var name = rows[i].cells[1].textContent.toLowerCase();
+                var note = rows[i].cells[3].textContent.toLowerCase();
+                var match = query === '' || name.indexOf(query) !== -1 || note.indexOf(query) !== -1;
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
 
         function undoEntry() {
             if (historyIndex > 0) {
@@ -2663,6 +2933,50 @@
                 checkboxCell.addEventListener('click', handleCheckboxCellClick);
             }
         }
+
+        // ── 크기/너비 슬라이더 ↔ 숫자 직접입력 양방향 동기화 ──
+        var SLIDER_PAIR_IDS = [
+            'fontSizeInput', 'newRowHighlightSizeInput', 'billIconSizeInput', 'entryCountFontSizeInput',
+            'pdfTitleSizeInput', 'pdfHeaderFontSizeInput',
+            'pdfColNumWidth', 'pdfColNumFontSize',
+            'pdfColNameWidth', 'pdfColNameFontSize',
+            'pdfColAmountWidth', 'pdfColAmountFontSize',
+            'pdfColNoteWidth', 'pdfColNoteFontSize'
+        ];
+
+        // 슬라이더를 드래그할 때(또는 값이 코드로 바뀔 때) 옆의 숫자 입력칸을 그 값으로 맞춘다.
+        function syncSliderValueLabels() {
+            SLIDER_PAIR_IDS.forEach(function(id) {
+                var range = document.getElementById(id);
+                var num = document.getElementById(id + 'Num');
+                if (range && num && num.value !== range.value) num.value = range.value;
+            });
+        }
+
+        // 숫자 입력칸에 직접 값을 타이핑하면 슬라이더도 같은 값으로 이동시키고,
+        // 슬라이더에 원래 연결돼 있던 동작(미리보기 갱신 등)도 그대로 실행되게 한다.
+        function initSliderNumberInputs() {
+            SLIDER_PAIR_IDS.forEach(function(id) {
+                var range = document.getElementById(id);
+                var num = document.getElementById(id + 'Num');
+                if (!range || !num) return;
+                num.addEventListener('input', function() {
+                    var min = parseFloat(range.min), max = parseFloat(range.max);
+                    var v = parseFloat(num.value);
+                    if (isNaN(v)) return;
+                    if (v < min) v = min;
+                    if (v > max) v = max;
+                    range.value = v;
+                    range.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                num.addEventListener('change', function() {
+                    // 빈칸으로 두거나 범위를 벗어나게 입력한 뒤 포커스를 옮기면 슬라이더 값으로 되돌린다.
+                    num.value = range.value;
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initSliderNumberInputs);
 
         function handleNoteCellClick(event) { editCell(event.currentTarget); }
         function handleCheckboxCellClick(event) {
